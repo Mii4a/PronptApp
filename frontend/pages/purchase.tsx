@@ -2,8 +2,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 
+interface Product {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+}
+
 const PurchasePage = () => {
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -37,6 +44,7 @@ const PurchasePage = () => {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
+  if (!product) return <p>Product not found</p>;
 
   return (
     <div>
