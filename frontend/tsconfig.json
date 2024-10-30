@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+      "target": "esnext",                     // コンパイル後のJavaScriptのターゲット
+      "lib": ["dom", "dom.iterable", "esnext"], // 使用するライブラリ
+      "allowJs": true,                        // JavaScriptファイルのインポートを許可
+      "skipLibCheck": true,                   // ライブラリファイルの型チェックをスキップ
+      "strict": true,                         // 厳格な型チェックを有効化
+      "forceConsistentCasingInFileNames": true, // ファイル名の大文字・小文字を厳密にチェック
+      "noEmit": true,                         // JavaScriptファイルを生成しない
+      "esModuleInterop": true,                // ESモジュールとCommonJSモジュールの相互運用性
+      "module": "esnext",                     // 使用するモジュールシステム
+      "moduleResolution": "node",             // モジュール解決方式をNode.jsに合わせる
+      "resolveJsonModule": true,              // JSONモジュールのインポートを許可
+      "isolatedModules": true,                // 各ファイルを個別にコンパイル
+      "jsx": "preserve",                      // JSX構文をそのまま保持（Next.jsで必要）
+      "incremental": true                     // 増分コンパイルを有効化
+    },
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"], // TypeScriptファイルの対象
+    "exclude": ["node_modules"]                         // 除外するファイルやフォルダ
+}
