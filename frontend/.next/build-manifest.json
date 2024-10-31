@@ -1,55 +1,17 @@
 {
   "polyfillFiles": [
-    "static/chunks/polyfills-42372ed130431b0a.js"
+    "static/chunks/polyfills.js"
   ],
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/42dpcqieL4b8bfSw52iez/_buildManifest.js",
-    "static/42dpcqieL4b8bfSw52iez/_ssgManifest.js"
+    "static/development/_buildManifest.js",
+    "static/development/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "rootMainFilesTree": {},
   "pages": {
-    "/": [
-      "static/chunks/webpack-59041051e025bed2.js",
-      "static/chunks/framework-384d27dd06c6faf3.js",
-      "static/chunks/main-46ecb633fc8631c3.js",
-      "static/chunks/pages/index-7f62356b79cd7b2a.js"
-    ],
-    "/_app": [
-      "static/chunks/webpack-59041051e025bed2.js",
-      "static/chunks/framework-384d27dd06c6faf3.js",
-      "static/chunks/main-46ecb633fc8631c3.js",
-      "static/chunks/pages/_app-e77ed5d8b9ede1a8.js"
-    ],
-    "/_error": [
-      "static/chunks/webpack-59041051e025bed2.js",
-      "static/chunks/framework-384d27dd06c6faf3.js",
-      "static/chunks/main-46ecb633fc8631c3.js",
-      "static/chunks/pages/_error-8c2b6ff87cd513a2.js"
-    ],
-    "/products/create": [
-      "static/chunks/webpack-59041051e025bed2.js",
-      "static/chunks/framework-384d27dd06c6faf3.js",
-      "static/chunks/main-46ecb633fc8631c3.js",
-      "static/chunks/66-e5aeaf5c42d3e276.js",
-      "static/chunks/pages/products/create-c0bcbd5f959e121d.js"
-    ],
-    "/products/my-products": [
-      "static/chunks/webpack-59041051e025bed2.js",
-      "static/chunks/framework-384d27dd06c6faf3.js",
-      "static/chunks/main-46ecb633fc8631c3.js",
-      "static/chunks/66-e5aeaf5c42d3e276.js",
-      "static/chunks/pages/products/my-products-8bb27608cff5a897.js"
-    ],
-    "/purchase": [
-      "static/chunks/webpack-59041051e025bed2.js",
-      "static/chunks/framework-384d27dd06c6faf3.js",
-      "static/chunks/main-46ecb633fc8631c3.js",
-      "static/chunks/66-e5aeaf5c42d3e276.js",
-      "static/chunks/pages/purchase-537eb105962b0cbb.js"
-    ]
+    "/_app": []
   },
   "ampFirstPages": []
 }

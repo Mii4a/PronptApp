@@ -13,7 +13,10 @@
       "resolveJsonModule": true,              // JSONモジュールのインポートを許可
       "isolatedModules": true,                // 各ファイルを個別にコンパイル
       "jsx": "preserve",                      // JSX構文をそのまま保持（Next.jsで必要）
-      "incremental": true                     // 増分コンパイルを有効化
+      "incremental": true,                     // 増分コンパイルを有効化
+      "paths": {
+        "@/*": ["./*"]
+      }
     },
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"], // TypeScriptファイルの対象
     "exclude": ["node_modules"]                         // 除外するファイルやフォルダ
