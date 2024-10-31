@@ -1,8 +1,16 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const MyProducts = () => {
-  const [products, setProducts] = useState([]);
+type Product = {
+  id: number;
+  title: string;
+  type: string;
+  price: number;
+  status: string;
+};
+
+const MyProducts: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     axios.get('/api/products/my-products').then(response => {

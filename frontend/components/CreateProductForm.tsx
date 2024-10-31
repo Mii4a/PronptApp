@@ -8,7 +8,7 @@ const CreateProductForm = () => {
   const [type, setType] = useState('prompt');  // プロンプトかアプリかを選択
   const [price, setPrice] = useState(0);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const product = { title, description, content, type, price };
     await axios.post('/api/products/create', product);
@@ -42,7 +42,7 @@ const CreateProductForm = () => {
         type="number"
         placeholder="Price"
         value={price}
-        onChange={(e) => setPrice(e.target.value)}
+        onChange={(e) => setPrice(Number(e.target.value))}
         required
       />
       <button type="submit">Create Product</button>
