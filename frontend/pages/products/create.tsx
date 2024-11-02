@@ -1,6 +1,7 @@
 import React from 'react';
 import CreateProductForm from '../../components/CreateProductForm';
 
+
 const CreateProductPage: React.FC = () => {
   return (
     <div>

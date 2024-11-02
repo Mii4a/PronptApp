@@ -25,7 +25,6 @@ const MyProducts: React.FC = () => {
         {products.map(product => (
           <li key={product.id}>
             {product.title} - {product.type} - ${product.price} - {product.status}
-            {/* 編集や削除のボタンを追加 */}
           </li>
         ))}
       </ul>

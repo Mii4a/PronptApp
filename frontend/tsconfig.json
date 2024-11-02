@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+      "baseUrl": ".",
       "target": "esnext",                     // コンパイル後のJavaScriptのターゲット
       "lib": ["dom", "dom.iterable", "esnext"], // 使用するライブラリ
       "allowJs": true,                        // JavaScriptファイルのインポートを許可
