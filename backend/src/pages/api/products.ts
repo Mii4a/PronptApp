@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import query from '../../lib/db';  // default exportとしてインポート
+import query from '@/lib/db';  // default exportとしてインポート
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

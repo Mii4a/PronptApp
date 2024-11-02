@@ -1,6 +1,11 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",                         // ベースディレクトリを指定 
+        "paths": {
+          "@/*": ["./*"]                       // エイリアスを指定
+        },
         "target": "ESNext",                    // JavaScriptのターゲットバージョン
+        "typeRoots": ["./node_modules/@types", "./types"],   // 型定義ファイルを検索するディレクトリを指定
         "module": "CommonJS",                  // サーバーサイドなのでCommonJSモジュールを使用
         "strict": true,                        // 厳格な型チェック
         "esModuleInterop": true,               // ESモジュールとCommonJSモジュールの相互運用性
@@ -8,7 +13,7 @@
         "forceConsistentCasingInFileNames": true, // ファイル名の大文字小文字を強制
         "moduleResolution": "node",            // Node.jsのモジュール解決方法を使用
         "outDir": "./dist",                    // コンパイル後のファイル出力先
-        "rootDir": "./src",                    // ソースファイルのルートディレクトリ
+        "rootDir": "./",                  // ソースファイルのルートディレクトリ
         "resolveJsonModule": true,             // JSONモジュールをインポート可能にする
         "isolatedModules": true,               // 各ファイルを個別にコンパイル
         "noEmit": true                         // 実際にはファイル出力を行わない
