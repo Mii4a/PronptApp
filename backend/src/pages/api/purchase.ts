@@ -1,27 +1,30 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Pool, QueryResult } from 'pg';
+import { getSession } from 'next-auth/react';
+import query from '../../lib/db';  // db.tsのquery関数をインポート
 import Stripe from 'stripe';
-
-// データベース接続
-const db = new Pool();  // PostgreSQLとの接続
 
 // Stripeインスタンスの作成
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-09-30.acacia', // 最新のAPIバージョンに更新
+  apiVersion: '2024-09-30.acacia', // 最新のAPIバージョンを指定
 });
 
-interface Product {
+type Product = {
   id: number;
   title: string;
   price: number;
-}
+};
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const session = await getSession({ req });
+  if (!session) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
   const { product_id } = req.body;
 
   try {
     // クエリ結果の型定義を指定
-    const result: QueryResult<Product> = await db.query('SELECT * FROM products WHERE id = $1', [product_id]);
+    const result = await query('SELECT * FROM products WHERE id = $1', [product_id]);
 
     // クエリ結果が空でないかをチェック
     if (result.rows.length === 0) {

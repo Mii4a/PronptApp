@@ -1,14 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import query from '../../../lib/db';  // queryを直接インポート
-
-interface Product {
+type Product = {
   title: string;
   description: string;
   content: string;
   type: string;
   price: number;
-}
+};
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { title, description, content, type, price }: Product = req.body;
