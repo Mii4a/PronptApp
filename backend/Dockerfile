@@ -1,5 +1,5 @@
 # ベースイメージ
-FROM node:23-alpine
+FROM node:22-alpine
 
 # 作業ディレクトリを作成
 WORKDIR /app
@@ -20,5 +20,5 @@ RUN npm run build
 EXPOSE 3001
 
 # アプリケーションを起動
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
 
