@@ -1,7 +1,11 @@
-import UserSignupForm from '../components/UserSignupForm';
+import UserSignupForm from '@/components/UserSignupForm';
 
-export default function Signup() {
+const SignupPage: React.FC = () => {
     return (
-        <UserSignupForm />
+        <div>
+            <UserSignupForm />
+        </div>
     );
 }
+
+export default SignupPage;

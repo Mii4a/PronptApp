@@ -1,56 +1,47 @@
-import React, { useState } from 'react'
-import axios from 'axios';
+import React from 'react'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import axios from 'axios'
+import { useRouter } from 'next/router'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from 'next/link'
-import { error } from 'console';
+
+// Yupでバリデーションスキーマを作成
+const schema = yup.object().shape({
+  username: yup.string().required('Username is required'),
+  email: yup.string().email('Invalid email').required('Email is required'),
+  password: yup
+    .string()
+    .required('Password is required')
+    .min(8, 'Password must be at least 8 characters')
+    .matches(/[a-z]/, 'Password must contain a lowercase letter')
+    .matches(/[0-9]/, 'Password must contain a number'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password'), undefined], 'Passwords must match')
+    .required('Confirm password is required')
+})
 
 export default function UserSignupForm() {
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const router = useRouter()
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema)
+  })
 
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {}
-
-    if (!username.trim()) {
-      newErrors.username = 'Username is required'
-    }
-
-    if (!email.trim()) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid'
-    }
-
-    if (!password) {
-      newErrors.password = 'Password is required'
-    } else if (password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters long'
-    }
-
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: any) => {
     try {
-      await axios.post('/api/auth/register', { name, email, password });
-      alert('Successfully signed up!');
+      await axios.post('/api/auth/signup', data)
+      alert('Successfully signed up!')
+      router.push('/login')
     } catch (err) {
-      setErrors({ error: 'Signup failed' });
+      console.error('Signup error:', err)
     }
-  };
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -60,75 +51,43 @@ export default function UserSignupForm() {
           <CardDescription>Sign up to get started with our service.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                aria-invalid={!!errors.username}
-                aria-describedby={errors.username ? "username-error" : undefined}
-              />
+              <Input id="username" type="text" {...register('username')} />
               {errors.username && (
                 <Alert variant="destructive">
-                  <AlertDescription id="username-error">{errors.username}</AlertDescription>
+                  <AlertDescription>{errors.username.message as string}</AlertDescription>
                 </Alert>
               )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "email-error" : undefined}
-              />
+              <Input id="email" type="email" {...register('email')} />
               {errors.email && (
                 <Alert variant="destructive">
-                  <AlertDescription id="email-error">{errors.email}</AlertDescription>
+                  <AlertDescription>{errors.email.message as string}</AlertDescription>
                 </Alert>
               )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                aria-invalid={!!errors.password}
-                aria-describedby={errors.password ? "password-error" : undefined}
-              />
+              <Input id="password" type="password" {...register('password')} />
               {errors.password && (
                 <Alert variant="destructive">
-                  <AlertDescription id="password-error">{errors.password}</AlertDescription>
+                  <AlertDescription>{errors.password.message as string}</AlertDescription>
                 </Alert>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                aria-invalid={!!errors.confirmPassword}
-                aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-              />
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input id="confirmPassword" type="password" {...register('confirmPassword')} />
               {errors.confirmPassword && (
                 <Alert variant="destructive">
-                  <AlertDescription id="confirm-password-error">{errors.confirmPassword}</AlertDescription>
+                  <AlertDescription>{errors.confirmPassword.message as string}</AlertDescription>
                 </Alert>
               )}
             </div>
@@ -147,4 +106,4 @@ export default function UserSignupForm() {
       </Card>
     </div>
   )
-};
+}

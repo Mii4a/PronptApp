@@ -1,27 +1,43 @@
 {
-    "compilerOptions": {
-        "baseUrl": ".",                         // ベースディレクトリを指定 
-        "paths": {
-          "@/*": ["./*"]                       // エイリアスを指定
-        },
-        "target": "ESNext",                    // JavaScriptのターゲットバージョン
-        "typeRoots": ["./node_modules/@types", "./types"],   // 型定義ファイルを検索するディレクトリを指定
-        "module": "CommonJS",                  // サーバーサイドなのでCommonJSモジュールを使用
-        "strict": true,                        // 厳格な型チェック
-        "esModuleInterop": true,               // ESモジュールとCommonJSモジュールの相互運用性
-        "skipLibCheck": true,                  // ライブラリファイルの型チェックをスキップ
-        "forceConsistentCasingInFileNames": true, // ファイル名の大文字小文字を強制
-        "moduleResolution": "node",            // Node.jsのモジュール解決方法を使用
-        "outDir": "./dist",                    // コンパイル後のファイル出力先
-        "rootDir": "./",                  // ソースファイルのルートディレクトリ
-        "resolveJsonModule": true,             // JSONモジュールをインポート可能にする
-        "isolatedModules": true,               // 各ファイルを個別にコンパイル
-        "noEmit": true                         // 実際にはファイル出力を行わない
+  "compilerOptions": {
+    "baseUrl": ".", // ベースディレクトリを指定
+    "paths": {
+      "@/*": [
+        "./*"
+      ] // エイリアスを指定
     },
-    "include": [
-        "src/**/*.ts",
-        "types/**/*.d.ts"
+    "target": "ESNext", // JavaScriptのターゲットバージョン
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types",
+      "./node_modules/yup"
+    ], // 型定義ファイルを検索するディレクトリを指定
+    "module": "CommonJS", // サーバーサイドなのでCommonJSモジュールを使用
+    "strict": true, // 厳格な型チェック
+    "esModuleInterop": true, // ESモジュールとCommonJSモジュールの相互運用性
+    "skipLibCheck": true, // ライブラリファイルの型チェックをスキップ
+    "forceConsistentCasingInFileNames": true, // ファイル名の大文字小文字を強制
+    "moduleResolution": "node", // Node.jsのモジュール解決方法を使用
+    "outDir": "./dist", // コンパイル後のファイル出力先
+    "rootDir": "./", // ソースファイルのルートディレクトリ
+    "resolveJsonModule": true, // JSONモジュールをインポート可能にする
+    "isolatedModules": true, // 各ファイルを個別にコンパイル
+    "noEmit": true // 実際にはファイル出力を行わない
+    ,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
     ],
-    "exclude": ["node_modules"]              
-  }
-    
+    "allowJs": true,
+    "incremental": true,
+    "jsx": "preserve"
+  },
+  "include": [
+    "src/**/*.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
