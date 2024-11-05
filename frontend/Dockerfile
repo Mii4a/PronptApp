@@ -16,6 +16,9 @@ COPY . .
 # アプリケーションをビルド
 RUN npm run build
 
+# ビルド済みのファイルを一時ディレクトリにコピー
+RUN cp -r .next /tmp/next
+
 # 3000ポートを公開
 EXPOSE 3000
 
