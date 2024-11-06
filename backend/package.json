@@ -13,12 +13,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.20.0",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "express": "^4.21.1",
     "next": "^15.0.1",
     "next-auth": "^4.24.10",
     "pg": "^8.10.0",
+    "prisma": "^5.22.0",
     "stripe": "^17.2.1",
     "yup": "^1.4.0"
   },
