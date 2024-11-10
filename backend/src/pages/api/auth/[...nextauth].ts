@@ -21,6 +21,7 @@ export default NextAuth({
         // credentialsがundefinedでないことを確認
         if (!credentials) {
           return null;
+          console.log("credentials undefined")
         }
 
         // データベースからユーザーを取得
@@ -28,12 +29,14 @@ export default NextAuth({
 
         if (!userFromDb) {
           return null; // ユーザーが見つからない場合
+          console.log("userFromDb undefined")
         }
 
         // パスワードの照合
         const isValidPassword = await bcrypt.compare(credentials.password, userFromDb.passwordHash);
         if (!isValidPassword) {
           return null; // パスワードが一致しない場合
+          console.log("isValidPassword false")
         }
 
         // 認証成功時に返すユーザーオブジェクト

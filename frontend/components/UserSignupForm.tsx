@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from 'next/link'
+import { useEffect } from 'react'
 
 // Yupでバリデーションスキーマを作成
 const schema = yup.object().shape({
@@ -33,13 +34,22 @@ export default function UserSignupForm() {
     resolver: yupResolver(schema)
   })
 
+  useEffect(() => {
+    console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+  }, []);
+
   const onSubmit = async (data: any) => {
+    // const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    console.log(apiUrl);
+    
     try {
-      await axios.post('/api/auth/signup', data)
+      await axios.post('http://localhost:3001/api/auth/signup', data)
       alert('Successfully signed up!')
       router.push('/login')
     } catch (err) {
       console.error('Signup error:', err)
+      console.error('apiURL', apiUrl)
     }
   }
 
@@ -53,7 +63,7 @@ export default function UserSignupForm() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">User</Label>
               <Input id="username" type="text" {...register('username')} />
               {errors.username && (
                 <Alert variant="destructive">
@@ -95,6 +105,7 @@ export default function UserSignupForm() {
             <Button type="submit" className="w-full">Sign Up</Button>
           </form>
         </CardContent>
+        
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
