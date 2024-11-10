@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ProductType {
+  PROMPT
+  APP
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  SOLD
+}
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  password    String
+  name        String
+  role        String       @default("USER")
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  products    Product[]
+  transactions Transaction[]
+  userProducts UserProduct[]
+}
+
+model Product {
+  id          Int          @id @default(autoincrement())
+  user_id     Int
+  user        User         @relation(fields: [user_id], references: [id])
+  title       String
+  price       Float
+  creator_name String
+  description String
+  content     String
+  type        String       @default("PROMPT")
+  status      String       @default("DRAFT")
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  transactions Transaction[]
+  userProducts UserProduct[]
+}
+
+model Transaction {
+  id          Int          @id @default(autoincrement())
+  user_id     Int
+  user        User         @relation(fields: [user_id], references: [id])
+  product_id  Int
+  product     Product      @relation(fields: [product_id], references: [id])
+  amount      Float
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+}
+
+model UserProduct {
+  user_id     Int
+  user        User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product_id  Int
+  product     Product      @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  @@id([user_id, product_id])
+}

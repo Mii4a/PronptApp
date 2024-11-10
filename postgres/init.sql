@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    name VARCHAR(100),
-    role VARCHAR(50) DEFAULT 'user',
+    name VARCHAR(100) NOT NULL,
+    role VARCHAR(50) DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN')),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -12,13 +12,14 @@ CREATE TABLE IF NOT EXISTS users (
 -- プロダクトテーブルの作成
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,  -- 投稿者（ユーザー）のID
+    user_id INT REFERENCES users(id),   
     title VARCHAR(255) NOT NULL,
-    description TEXT,
-    content TEXT NOT NULL,  -- プロンプトの内容またはアプリのメタデータ
-    type VARCHAR(50) NOT NULL CHECK (type IN ('prompt', 'app')),  -- 'prompt'か'app'かを区別
-    price DECIMAL(10, 2) DEFAULT 0.00,  -- プロダクトの価格
-    status VARCHAR(50) DEFAULT 'draft',  -- 'draft', 'published', 'sold'などのステータス
+    price DECIMAL(10, 2) NOT NULL,
+    creator_name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    content TEXT NOT NULL,
+    type VARCHAR(50) DEFAULT 'PROMPT' CHECK (type IN ('PROMPT', 'APP')),
+    status VARCHAR(50) DEFAULT 'DRAFT' CHECK (status IN ('DRAFT', 'PUBLISHED', 'SOLD')),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -27,10 +28,11 @@ CREATE TABLE IF NOT EXISTS products (
 -- 取引履歴テーブルの作成
 CREATE TABLE IF NOT EXISTS transactions (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,
-    product_id INT REFERENCES products(id) ON DELETE CASCADE,  -- プロダクトIDを参照
-    amount DECIMAL(10, 2) NOT NULL,  -- 購入金額
-    created_at TIMESTAMP DEFAULT NOW()
+    user_id INT REFERENCES users(id),
+    product_id INT REFERENCES products(id),
+    amount DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 
@@ -38,7 +40,8 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE TABLE IF NOT EXISTS user_products (
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
     product_id INT REFERENCES products(id) ON DELETE CASCADE,
-    PRIMARY KEY (user_id, product_id),  -- 複合キーで重複購入を防ぐ
-    purchased_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    PRIMARY KEY (user_id, product_id)
 );
 
