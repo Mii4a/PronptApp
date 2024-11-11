@@ -1,16 +1,15 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
 import axios from 'axios'
 import { useRouter } from 'next/router'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from 'next/link'
-import { useEffect } from 'react'
 
 // Yupでバリデーションスキーマを作成
 const schema = yup.object().shape({
@@ -33,10 +32,6 @@ export default function UserSignupForm() {
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(schema)
   })
-
-  useEffect(() => {
-    console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
-  }, []);
 
   const onSubmit = async (data: any) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL
@@ -62,7 +57,6 @@ export default function UserSignupForm() {
       router.push('/login')
     } catch (err) {
       console.error('Signup error:', err)
-      console.error('apiURL', apiUrl)
     }
   }
 

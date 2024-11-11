@@ -19,17 +19,17 @@ export const getProducts = async (req: Request, res: Response) => {
 };
 
 export const sellProduct = async (req: Request, res: Response) => {
-  const { title, price, user, creator_name, description, content } = req.body;
-  const user_id = (req as any).user.id;
+  const { title, price, user, creatorName, description, content } = req.body;
+  const userId = (req as any).user.id;
 
   try {
     const newProduct = await prisma.product.create({
       data: {
         title,
         price,
-        user_id,
+        userId,
         user,
-        creator_name,
+        creatorName,
         description,
         content,
         type: 'PROMPT',
@@ -85,11 +85,11 @@ export const purchaseProduct = async (req: Request, res: Response) => {
 };
 
 export const getUserProducts = async (req: Request, res: Response) => {
-  const user_id = (req as any).user.id;
+  const userId = (req as any).user.id;
 
   try {
     const products = await prisma.product.findMany({
-      where: { user_id },
+      where: { userId },
     });
     res.status(200).json(products);
   } catch (error) {

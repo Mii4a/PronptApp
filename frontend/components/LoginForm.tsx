@@ -1,29 +1,42 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from 'next/link'
+import axios from 'axios';
+
+// Yupでバリデーションスキーマを作成
+const schema = yup.object().shape({
+  email: yup.string().required('Email is required'),
+  password: yup.string().required('Password is required'),
+})
 
 export default function UserLogin() {
-  const { register, handleSubmit, formState: { errors } } = useForm()
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema)
+  })
   const router = useRouter();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+
+  useEffect(() => {
+    console.log("ApiUrl:", apiUrl)
+  }, [])
 
   const onSubmit = async (data: any) => {
-    const result = await signIn('credentials', {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-    })
-
-    if (result?.error){
-        alert(result.error) //ログイン失敗時にアラートを表示
-    } else {
-        router.push('/') //ログイン成功時にリダイレクト
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    
+    try {
+      await axios.post(`${apiUrl}/api/auth/login`, data)
+      router.push('/') //ログイン成功時にリダイレクト
+    } catch (err) {
+      console.log('Login error:', err)  
+      alert('Email or Password is invalid') //ログイン失敗時にアラートを表示
     }
   }
 
@@ -34,6 +47,7 @@ export default function UserLogin() {
           <CardTitle className="text-2xl font-bold">Log In</CardTitle>
           <CardDescription>Welcome back! Please log in to your account.</CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
@@ -74,6 +88,7 @@ export default function UserLogin() {
 
             <Button type="submit" className="w-full">Log In</Button>
           </form>
+
         </CardContent>
         <CardFooter className="flex flex-col items-center space-y-2">
           <p className="text-sm text-muted-foreground">

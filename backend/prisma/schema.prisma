@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -28,33 +24,35 @@ enum ProductStatus {
   PUBLISHED
   SOLD
 }
-model User {
-  id          Int          @id @default(autoincrement())
-  email       String       @unique
-  password    String
-  name        String
-  role        String       @default("USER")
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
 
-  products    Product[]
+model User {
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
+  password     String
+  name         String
+  role         UserRole     @default(USER)
+  refreshToken String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  products     Product[]
   transactions Transaction[]
   userProducts UserProduct[]
 }
 
 model Product {
-  id          Int          @id @default(autoincrement())
-  user_id     Int
-  user        User         @relation(fields: [user_id], references: [id])
-  title       String
-  price       Float
-  creator_name String
-  description String
-  content     String
-  type        String       @default("PROMPT")
-  status      String       @default("DRAFT")
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
+  id           Int          @id @default(autoincrement())
+  userId       Int
+  user         User         @relation(fields: [userId], references: [id])
+  title        String
+  price        Float
+  creatorName  String
+  description  String
+  content      String
+  type         ProductType  @default(PROMPT)
+  status       ProductStatus @default(DRAFT)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   transactions Transaction[]
   userProducts UserProduct[]
@@ -62,22 +60,22 @@ model Product {
 
 model Transaction {
   id          Int          @id @default(autoincrement())
-  user_id     Int
-  user        User         @relation(fields: [user_id], references: [id])
-  product_id  Int
-  product     Product      @relation(fields: [product_id], references: [id])
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id])
+  productId   Int
+  product     Product      @relation(fields: [productId], references: [id])
   amount      Float
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model UserProduct {
-  user_id     Int
-  user        User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  product_id  Int
-  product     Product      @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId   Int
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
-  @@id([user_id, product_id])
+  @@id([userId, productId])
 }
