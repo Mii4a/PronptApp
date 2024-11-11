@@ -14,7 +14,7 @@ import { useEffect } from 'react'
 
 // Yupでバリデーションスキーマを作成
 const schema = yup.object().shape({
-  username: yup.string().required('Username is required'),
+  name: yup.string().required('Username is required'),
   email: yup.string().email('Invalid email').required('Email is required'),
   password: yup
     .string()
@@ -39,12 +39,25 @@ export default function UserSignupForm() {
   }, []);
 
   const onSubmit = async (data: any) => {
-    // const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const apiUrl = process.env.NEXT_PUBLIC_API_URL
-    console.log(apiUrl);
     
+    if (!apiUrl) {
+      console.error('API URL is not defined');
+      return;
+    }
+
+    const { name, email, password } = data;
+
     try {
-      await axios.post('http://localhost:3001/api/auth/signup', data)
+      await axios.post(`${apiUrl}/api/auth/signup`, {
+        name,
+        email,
+        password
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
       alert('Successfully signed up!')
       router.push('/login')
     } catch (err) {
@@ -63,11 +76,11 @@ export default function UserSignupForm() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">User</Label>
-              <Input id="username" type="text" {...register('username')} />
-              {errors.username && (
+              <Label htmlFor="name">Username</Label>
+              <Input id="name" type="text" {...register('name')} />
+              {errors.name && (
                 <Alert variant="destructive">
-                  <AlertDescription>{errors.username.message as string}</AlertDescription>
+                  <AlertDescription>{errors.name.message as string}</AlertDescription>
                 </Alert>
               )}
             </div>

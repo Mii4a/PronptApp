@@ -1,8 +1,8 @@
 // pages/api/auth/signup.ts
 
 import { NextApiRequest, NextApiResponse } from 'next'
-import query from '@/lib/db'
-import { hashPassword } from '@/lib/auth'
+import query from '@/src/lib/pgClient'
+import { hashPassword } from '@/src/lib/auth'
 import * as yup from 'yup'
 
 // バリデーションスキーマを作成

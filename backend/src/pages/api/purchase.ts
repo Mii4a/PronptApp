@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import query from '@/lib/db';  // db.tsのquery関数をインポート
+import query from '@/src/lib/pgClient';  // pg.tsのquery関数をインポート
 import Stripe from 'stripe';
 
 // Stripeインスタンスの作成

@@ -43,5 +43,5 @@ EXPOSE 3001
 USER mii4a
 
 # アプリケーションを起動
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:express"]
 
