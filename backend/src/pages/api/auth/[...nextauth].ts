@@ -1,7 +1,7 @@
 import NextAuth, { User, AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
-import query from '@/lib/db';
+import query from '@/src/lib/pgClient';
 
 // ユーザーの型定義に role を追加
 interface CustomUser extends User {

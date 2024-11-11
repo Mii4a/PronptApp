@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import query from '@/lib/db';  // queryを直接インポート
+import query from '@/src/lib/pgClient';  // queryを直接インポート
+
 type Product = {
   title: string;
   description: string;

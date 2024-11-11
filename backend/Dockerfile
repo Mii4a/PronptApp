@@ -12,12 +12,6 @@ ARG GID=989
 # 必要なパッケージをインストール
 RUN apk add --no-cache sudo
 
-# ユーザーとグループを作成
-RUN addgroup -g $GID mii4a && \
-    adduser -D -u $UID -G mii4a mii4a && \
-    echo "mii4a ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-
 # 作業ディレクトリを作成
 WORKDIR /backend
 
@@ -40,8 +34,8 @@ RUN cp -r .next /tmp/next
 EXPOSE 3001
 
 # ユーザーを変更
-USER mii4a
+USER node
 
 # アプリケーションを起動
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:express"]
 

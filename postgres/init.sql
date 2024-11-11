@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     name VARCHAR(100) NOT NULL,
     role VARCHAR(50) DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN')),
+    refresh_token VARCHAR(500)
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

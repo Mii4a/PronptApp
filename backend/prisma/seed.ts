@@ -15,13 +15,13 @@ async function main() {
         name: "Sample User 1",
         email: "sample1@example.com",
         password: password,
-        role: "admin",
+        role: "ADMIN",
       },
       {
         name: "Sample User 2",
         email: "sample2@example.com",
         password: password,
-        role: "user",
+        role: "USER",
       },
     ],
   });
