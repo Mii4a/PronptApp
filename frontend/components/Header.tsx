@@ -23,7 +23,7 @@ export default function Header() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       
       try {
-        const response = await axios.get(`${apiUrl}/api/session`, { withCredentials: true });
+        const response = await axios.get(`${apiUrl}/api/auth/session`, { withCredentials: true });
         setSession(response.data); // セッションデータを保存
       } catch (error) {
         console.error('Failed to fetch session:', error);

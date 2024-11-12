@@ -32,7 +32,7 @@ export default function UserLoginForm() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL
     
     try {
-      await axios.post(`${apiUrl}/api/auth/login`, data)
+      await axios.post(`${apiUrl}/api/auth/login`, data, { withCredentials: true })
       router.push('/') //ログイン成功時にリダイレクト
     } catch (err) {
       console.log('Login error:', err)  

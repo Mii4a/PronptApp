@@ -9,7 +9,7 @@
     "build": "NODE_ENV=production next build",
     "start": "NODE_ENV=production next start -p 3001",
     "db:seed": "ts-node prisma/seed.ts",
-    "start:express": "ts-node src/server.ts",
+    "start:express": "NODE_ENV=production node dist/server.js",
     "dev:express": "nodemon src/server.ts",
     "build:express": "tsc -p tsconfig.json"
   },
@@ -43,6 +43,7 @@
     "@types/react": "18.3.12",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.6.3"
   }
 }

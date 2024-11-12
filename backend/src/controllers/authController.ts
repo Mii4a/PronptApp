@@ -18,6 +18,7 @@ const signupSchema = yup.object().shape({
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   try {
+    
     // バリデーションを実行
     await signupSchema.validate({ name, email, password });
 
