@@ -1,35 +1,14 @@
-import Link from 'next/link'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Search, ShoppingCart, User } from 'lucide-react'
+import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Search, ShoppingCart, User } from 'lucide-react';
+import Header from "@/components/Header";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-background border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold">AppPromptMarket</Link>
-          <div className="flex items-center space-x-4">
-            <div className="relative hidden md:block">
-              <Input
-                type="search"
-                placeholder="Search apps and prompts..."
-                className="pl-10 pr-4 py-2 w-64"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            </div>
-            <Button variant="ghost" size="icon">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="sr-only">Cart</span>
-            </Button>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-              <span className="sr-only">User account</span>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="flex-grow">
         <section className="bg-primary text-primary-foreground py-16">

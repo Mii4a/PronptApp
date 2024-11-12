@@ -1,12 +1,11 @@
 import { Router } from 'express';
-import { signup, login } from '../controllers/authController';
+import { signup, login, getSettion } from '../controllers/authController';
 
 const router = Router();
 
-// サインアップのエンドポイント
+// auth関係のエンドポイント
 router.post('/signup', signup);
-
-// ログインのエンドポイント
 router.post('/login', login);
+router.get('/session', getSettion);
 
 export default router;
