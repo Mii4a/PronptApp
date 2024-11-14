@@ -5,8 +5,8 @@
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/OestdZsVWxntRpXwSvbp1/_buildManifest.js",
-    "static/OestdZsVWxntRpXwSvbp1/_ssgManifest.js"
+    "static/jQFAZYuEPl-tV4EEgbaRm/_buildManifest.js",
+    "static/jQFAZYuEPl-tV4EEgbaRm/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "rootMainFilesTree": {},
@@ -24,7 +24,7 @@
       "static/chunks/webpack-883d6e8104129710.js",
       "static/chunks/framework-384d27dd06c6faf3.js",
       "static/chunks/main-fbd043a94b31f649.js",
-      "static/css/8492204dc922122a.css",
+      "static/css/f5c93cc921171f0b.css",
       "static/chunks/pages/_app-be3f8c479c895035.js"
     ],
     "/_error": [
@@ -55,7 +55,10 @@
       "static/chunks/framework-384d27dd06c6faf3.js",
       "static/chunks/main-fbd043a94b31f649.js",
       "static/chunks/66-e5aeaf5c42d3e276.js",
-      "static/chunks/pages/products/sell-75ebc812012bd888.js"
+      "static/chunks/945-e22e726b0efb05a8.js",
+      "static/chunks/638-3de773064f28788a.js",
+      "static/chunks/138-4feef04a1a02522e.js",
+      "static/chunks/pages/products/sell-32a3ae891aa598b0.js"
     ],
     "/purchase": [
       "static/chunks/webpack-883d6e8104129710.js",
@@ -63,8 +66,8 @@
       "static/chunks/main-fbd043a94b31f649.js",
       "static/chunks/66-e5aeaf5c42d3e276.js",
       "static/chunks/945-e22e726b0efb05a8.js",
-      "static/chunks/896-1184275a9550f122.js",
-      "static/chunks/pages/purchase-c3d32374825b4f6c.js"
+      "static/chunks/638-3de773064f28788a.js",
+      "static/chunks/pages/purchase-9fc42220068ec45a.js"
     ],
     "/signup": [
       "static/chunks/webpack-883d6e8104129710.js",
