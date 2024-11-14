@@ -18,8 +18,9 @@ export const getProducts = async (req: Request, res: Response) => {
   }
 };
 
-export const sellProduct = async (req: Request, res: Response) => {
-  const { title, price, user, creatorName, description, content } = req.body;
+export const registerProduct = async (req: Request, res: Response) => {
+  const { title, price, description, features, type, 
+          demoUrl, promptCount, prompts, imageUrl } = req.body;
   const userId = (req as any).user.id;
 
   try {
@@ -27,13 +28,17 @@ export const sellProduct = async (req: Request, res: Response) => {
       data: {
         title,
         price,
-        userId,
-        user,
-        creatorName,
         description,
-        content,
-        type: 'PROMPT',
+        features,
+        type,
         status: 'DRAFT',
+        demoUrl,
+        promptCount,
+        prompts,
+        imageUrl,
+        user: {
+          connect: { id: userId }
+        }
       },
     });
     res.status(201).json({ message: 'Product sold successfully!', product: newProduct });
