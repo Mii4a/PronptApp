@@ -15,14 +15,14 @@ WORKDIR /backend
 # package.json と package-lock.json をコピー
 COPY package*.json ./
 
-# 依存関係をインストール
-RUN npm ci
-
 # アプリケーションコードをコピー
 COPY . .
 
+# 依存関係をインストール
+RUN npm i
+
 # アプリケーションをビルド
-RUN npm run build:express
+RUN npm run build && npm run build:express
 
 # ビルド済みのファイルを一時ディレクトリにコピー
 RUN cp -r .next /tmp/next
@@ -34,5 +34,5 @@ EXPOSE 3001
 USER node
 
 # アプリケーションを起動
-CMD ["node", "dist/server.js"]
+CMD ["npm", "run", "start:express"]
 

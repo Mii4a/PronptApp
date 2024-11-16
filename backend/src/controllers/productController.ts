@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import { string } from 'yup';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-09-30.acacia',
+  apiVersion: '2024-10-28.acacia',
 });
 
 export const getProducts = async (req: Request, res: Response) => {
@@ -19,9 +19,13 @@ export const getProducts = async (req: Request, res: Response) => {
 };
 
 export const registerProduct = async (req: Request, res: Response) => {
+  console.log('Request body:', req.body); // registerProductの冒頭に追加
+  console.log('Request received at /api/products/register');
+  console.log('Request body:', req.body);
+  
   const { title, price, description, features, type, 
           demoUrl, promptCount, prompts, imageUrl } = req.body;
-  const userId = (req as any).user.id;
+  const userId = (req as any).user.id || 1;
 
   try {
     const newProduct = await prisma.product.create({
@@ -34,11 +38,13 @@ export const registerProduct = async (req: Request, res: Response) => {
         status: 'DRAFT',
         demoUrl,
         promptCount,
-        prompts,
         imageUrl,
         user: {
           connect: { id: userId }
-        }
+        },
+        prompts: {
+          create: prompts, // promptsは[{ input: '...', output: '...' }, ...]の形式
+        },
       },
     });
     res.status(201).json({ message: 'Product sold successfully!', product: newProduct });

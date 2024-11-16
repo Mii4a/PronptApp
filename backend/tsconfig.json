@@ -7,10 +7,12 @@
       ] // エイリアスを指定
     },
     "target": "ESNext", // JavaScriptのターゲットバージョン
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
     "typeRoots": [
       "./node_modules/@types",
       "./src/types/",
-      "./src/types/express-session.d.ts"
+      "./src/types/express-session.d.ts",
+      "./prisma/schema.prisma"
     ], // 型定義ファイルを検索するディレクトリを指定
     "module": "CommonJS", // サーバーサイドなのでCommonJSモジュールを使用
     "strict": true, // 厳格な型チェック
@@ -19,7 +21,7 @@
     "forceConsistentCasingInFileNames": true, // ファイル名の大文字小文字を強制
     "moduleResolution": "node", // Node.jsのモジュール解決方法を使用
     "outDir": "./dist", // コンパイル後のファイル出力先
-    "rootDir": "./", // ソースファイルのルートディレクトリ
+    "rootDir": "./src", // ソースファイルのルートディレクトリ
     "resolveJsonModule": true, // JSONモジュールをインポート可能にする
     "isolatedModules": true, // 各ファイルを個別にコンパイル
     "noEmit": false // 実際にはファイル出力を行わない
