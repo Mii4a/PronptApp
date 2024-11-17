@@ -30,10 +30,24 @@ services:
       - ./node_modules:/backend/node_modules
     depends_on:
       - postgres
+      - redis
     networks:
       - app-network
     ports:
       - '3001:3001'
+
+  redis: 
+    image: redis:alpine
+    user: "${UID}:${GID}"
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis:/redis
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - app-network
       
   pgadmin:
     image: dpage/pgadmin4

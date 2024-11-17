@@ -1,46 +1,47 @@
 {
   "compilerOptions": {
-    "baseUrl": ".", // ベースディレクトリを指定
+    "baseUrl": ".", // モジュールの基準となるベースディレクトリを指定
     "paths": {
       "@/*": [
         "./*"
-      ] // エイリアスを指定
+      ] // エイリアスを指定（例えば "@/module" は "./module" を参照）
     },
-    "target": "ESNext", // JavaScriptのターゲットバージョン
-    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
+    "target": "ESNext", // 出力するJavaScriptのバージョン（最新のES仕様に準拠）
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo", // 増分コンパイルの情報を保存するファイル
     "typeRoots": [
-      "./node_modules/@types",
-      "./src/types/",
-      "./src/types/express-session.d.ts",
-      "./prisma/schema.prisma"
-    ], // 型定義ファイルを検索するディレクトリを指定
-    "module": "CommonJS", // サーバーサイドなのでCommonJSモジュールを使用
-    "strict": true, // 厳格な型チェック
-    "esModuleInterop": true, // ESモジュールとCommonJSモジュールの相互運用性
-    "skipLibCheck": true, // ライブラリファイルの型チェックをスキップ
-    "forceConsistentCasingInFileNames": true, // ファイル名の大文字小文字を強制
-    "moduleResolution": "node", // Node.jsのモジュール解決方法を使用
-    "outDir": "./dist", // コンパイル後のファイル出力先
+      "./node_modules/@types", // 型定義ファイルを検索する標準ディレクトリ
+      "./src/types/", // プロジェクト独自の型定義ディレクトリ
+      "./src/types/express-type.d.ts", // 特定の型定義ファイルを直接指定
+      "./prisma/schema.prisma" // Prismaスキーマを型定義として認識
+    ], // 型定義ファイルを検索するディレクトリをリスト形式で指定
+    "module": "CommonJS", // 使用するモジュールシステム（Node.js環境ではCommonJSを使用）
+    "strict": true, // 厳格な型チェックを有効化
+    "esModuleInterop": true, // ESモジュールとCommonJSモジュールの相互運用性を許可
+    "skipLibCheck": true, // 外部ライブラリの型定義ファイルのチェックをスキップ（ビルド速度向上のため）
+    "forceConsistentCasingInFileNames": true, // ファイル名の大文字小文字の違いを強制的にチェック
+    "moduleResolution": "node", // モジュール解決方法にNode.jsのルールを使用
+    "outDir": "./dist", // コンパイル後の出力先ディレクトリ
     "rootDir": "./src", // ソースファイルのルートディレクトリ
-    "resolveJsonModule": true, // JSONモジュールをインポート可能にする
-    "isolatedModules": true, // 各ファイルを個別にコンパイル
-    "noEmit": false // 実際にはファイル出力を行わない
-    ,
+    "resolveJsonModule": true, // JSONモジュールを直接インポート可能にする
+    "isolatedModules": true, // 各ファイルを独立したモジュールとして扱う（Next.jsで必要）
+    "noEmit": false, // 出力ファイルを生成（falseにより有効）
+    "allowSyntheticDefaultImports": true, // デフォルトエクスポートがないモジュールでもデフォルトインポートを許可
     "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
+      "dom", // DOM APIを使用可能にする
+      "dom.iterable", // DOMの反復可能なAPI（NodeListなど）を使用可能にする
+      "esnext" // 最新のECMAScript仕様を使用可能にする
     ],
-    "allowJs": true,
-    "incremental": true,
-    "jsx": "preserve"
+    "allowJs": true, // JavaScriptファイルをTypeScriptプロジェクトに含める
+    "incremental": true, // 増分コンパイルを有効にしてビルド時間を短縮
+    "jsx": "preserve" // JSX構文をそのまま保持（Reactで使用）
   },
   "include": [
-    "./server",
-    "./src/**/*.ts",
-    "src/types/**/*.d.ts"
+    "./server", // コンパイル対象のフォルダ（サーバー関連）
+    "./src/**/*.ts", // ソースコード内のすべてのTypeScriptファイル
+    "./src/**/*.d.ts", // ソースコード内のすべての型定義ファイル
+    "./src/types/**/*.d.ts" // 型定義ファイルが含まれるディレクトリを明示的に追加
   ],
   "exclude": [
-    "node_modules"
+    "node_modules" // 外部ライブラリのフォルダはコンパイル対象外
   ]
 }

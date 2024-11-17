@@ -7,6 +7,10 @@ import { createClient } from '@redis/client';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+console.log('TypeScript server is running...');
+console.log('Environment:', process.env.NODE_ENV);
+
+
 const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://redis:6379',
   socket: {

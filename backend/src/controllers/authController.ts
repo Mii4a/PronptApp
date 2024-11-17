@@ -61,6 +61,9 @@ export const signup = async (req: Request, res: Response) => {
         password: passwordHash,
       },
     });
+    
+    // 動作確認用
+    (req.session as any).user = { id: newUser.id, name: newUser.name };
 
     // セッションにユーザーIDとユーザー名を保存
     req.session.user = { id: newUser.id, name: newUser.name };
