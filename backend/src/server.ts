@@ -58,7 +58,7 @@ app.use(
 // ミドルウェア設定
 app.use(
   cors({
-    origin: 'http://localhost:3000', // フロントエンドのURL
+    origin: `${process.env.FRONTEND_URL}`, // フロントエンドのURL
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true, // クッキーの送信を許可
   })
