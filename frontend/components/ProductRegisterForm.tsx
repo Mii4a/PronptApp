@@ -1,184 +1,175 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useState } from 'react'
+import { z } from 'zod'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Upload, DollarSign, ChevronLeft, ChevronRight, Plus, Trash2, ImageIcon } from 'lucide-react'
-import { fromTheme } from 'tailwind-merge';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Upload, ChevronLeft, ChevronRight, Plus, Trash2, ImageIcon, X } from 'lucide-react'
+import { useToast } from "@/hooks/use-toast"
+import axios from 'axios';
+import { productRegisterSchema } from '@/validation/productRegisterSchema'
 
+type Currency = 'JPY' | 'USD'
+type ProductType = 'webapp' | 'prompt'
 
-// Zodバリデーションスキーマ
-const schema = z
-  .object({
-    type: z.enum(['webapp', 'prompt'], { invalid_type_error: 'Invalid item type' }),
-    title: z.string().min(1, 'Title is required').max(50, 'Title cannot exceed 50 characters'),
-    description: z.string().min(1, 'Description is required').max(200, 'Description cannot exceed 200 characters'),
-    category: z.string().min(1, 'Category is required'),
-    price: z
-      .number({ invalid_type_error: 'Price must be a number' })
-      .positive('Price must be a positive number'),
-    demoUrl: z.string().url('Invalid URL format').optional(),
-    
-    promptCount: z.number().int('Prompt count must be an integer').positive('Prompt count must be a positive number').optional(),
-    features: z.string().optional(),
-    image: typeof window !== 'undefined' ? z.instanceof(File).nullable().optional() : z.any(),
-    prompts: z
-      .array(
-        z.object({
-          input: z.string().min(1, 'Prompt input is required'),
-          output: z.string().min(1, 'Prompt output is required'),
-        })
-      ).optional(), // 初期状態ではオプションにして、superRefineで必須バリデーションを追加
-  })
-  .superRefine((data, ctx) => {
-    if (data.type === 'webapp' && !data.demoUrl) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['demoUrl'],
-        message: 'Demo URL is required for web apps',
-      });
-    }
-    if (data.type === 'prompt' && data.promptCount === undefined) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['promptCount'],
-        message: 'Number of prompts is required for prompt collections',
-      });
-    }
-    if (data.type === 'prompt' && data.promptCount === undefined) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['prompts'],
-        message: 'Prompts(input - output) is required for prompt collections',
-      });
-    }
-  })
-
-// スキーマから型定義を抽出
-type FormData = z.infer<typeof schema>;
-
-type PromptPair = {
-  prompt: string;
+type Prompt = {
+  input: string;
   output: string;
-  image: File | null;
+  imageUrl: File | null;
+}
+
+type FormData = {
+  type: ProductType;
+  title: string;
+  description: string;
+  category: string;
+  price: string;
+  currency: Currency;
+  features: string;
+  demoUrl: string;
+  promptCount: string;
+  imageUrls: File[];
+  prompts: Prompt[];
 }
 
 export default function ProductRegisterForm() {
-  const { control, register, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  });
-
   const [formData, setFormData] = useState<FormData>({
     type: 'webapp',
     title: '',
     description: '',
     category: '',
-    price: 0,
+    price: '',
+    currency: 'JPY',
     features: '',
     demoUrl: '',
-    prompts: [{ input: '', output: ''}],
-    promptCount: 0,
-    image: null,
-  });
-
-  const [promptPairs, setPromptPairs] = useState<PromptPair[]>([{ prompt: '', output: '', image: null }])
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+    promptCount: '',
+    imageUrls: [],
+    prompts: [{ input: '', output: '', imageUrl: null }],
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [currentPromptPage, setCurrentPromptPage] = useState(0)
+  const { toast } = useToast()
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target
     setFormData(prev => ({ ...prev, [name]: value }))
+    setErrors(prev => ({ ...prev, [name]: '' }))
   }
 
   const handleSelectChange = (name: string) => (value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }))
+    setErrors(prev => ({ ...prev, [name]: '' }))
   }
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setFormData(prev => ({ ...prev, image: file }))
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+    const files = event.target.files
+    if (files) {
+      const newImageUrls = Array.from(files)
+      setFormData(prev => ({ ...prev, imageUrls: [...prev.imageUrls, ...newImageUrls] }))
     }
   }
 
-  const handlePromptPairChange = (index: number, field: 'prompt' | 'output', value: string) => {
-    const newPromptPairs = [...promptPairs]
-    newPromptPairs[index][field] = value
-    setPromptPairs(newPromptPairs)
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      imageUrls: prev.imageUrls.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handlePromptChange = (index: number, field: keyof Prompt, value: string) => {
+    console.log('changing prompts')
+    const newPrompts = [...formData.prompts]
+    newPrompts[index] = { ...newPrompts[index], [field]: value }
+    setFormData(prev => ({ ...prev, prompts: newPrompts }))
+    setErrors(prev => ({ ...prev, [`prompts.${index}.${field}`]: '' }))
   }
 
   const handlePromptImageUpload = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      const newPromptPairs = [...promptPairs]
-      newPromptPairs[index].image = file
-      setPromptPairs(newPromptPairs)
+      const newPrompts = [...formData.prompts]
+      newPrompts[index] = { ...newPrompts[index], imageUrl: file }
+      setFormData(prev => ({ ...prev, prompts: newPrompts }))
     }
   }
 
-  const addPromptPair = () => {
-    setPromptPairs([...promptPairs, { prompt: '', output: '', image: null }])
+  const addPrompt = () => {
+    setFormData(prev => ({
+      ...prev,
+      prompts: [...prev.prompts, { input: '', output: '', imageUrl: null }]
+    }))
   }
 
-  const removePromptPair = (index: number) => {
-    const newPromptPairs = promptPairs.filter((_, i) => i !== index)
-    setPromptPairs(newPromptPairs)
+  const removePrompt = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      prompts: prev.prompts.filter((_, i) => i !== index)
+    }))
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    console.log('formData:', formData);
+    // const validatedData = productRegisterSchema.parse({
+    //   ...formData,
+    //   price: parseFloat(formData.price),
+    //   promptCount: formData.type === 'prompt' ? parseInt(formData.promptCount) : undefined,
+    // })
+    // console.log('validatedData:', validatedData);
+
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     
-    const productData = {
-      title: formData.title,
-      price: formData.price,
-      description: formData.description,
-      type: formData.type === 'webapp' ? 'WEBAPP' : 'PROMPT',
-      category: formData.category,
-      features: formData.features,
-      demoUrl: formData.demoUrl,
-      promptCount: formData.type === 'prompt' ? formData.promptCount : null,
-      prompts: formData.type === 'prompt' ? promptPairs : null,
-      image: formData.image
-    };
-    
-    const formDataToSend = new FormData();
-    Object.keys(productData).forEach(key => {
-      if (productData[key as keyof typeof productData] !== undefined) {
-        formDataToSend.append(key, String(productData[key as keyof typeof productData]));
-      }
-    });
-
-    if (formData.image) {
-      formDataToSend.append('image', formData.image);
-    }
-    
-    console.log('formDataToSend:', formDataToSend)
-    console.log('formData:', formData)
-
     try {
-      await axios.post(`${apiUrl}/api/products/register`, productData, {
+      await axios.post(`${apiUrl}/api/products/register`, {
+        ...formData,
+        type: formData.type === 'webapp' ? 'WEBAPP' : 'PROMPT',
+        promptCount: formData.type === 'prompt' ? formData.promptCount : undefined,
+        prompts: formData.type === 'prompt' ? formData.prompts : undefined,
+      }, {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true
       });
+
       console.log('Product registered successfully');
+      toast({
+        title: "Success",
+        description: "Your item has been listed for sale.",
+      })
     } catch (error) {
-      console.error('Product registration failed', error);
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string> = {}
+        error.errors.forEach((err) => {
+          const path = err.path.join('.')
+          newErrors[path] = err.message
+        })
+        setErrors(newErrors)
+        toast({
+          title: "Error",
+          description: "Please correct the errors in the form.",
+          variant: "destructive",
+        })
+      } else {
+        console.error('Product registration failed', error);
+        toast({
+          title: "Error",
+          description: "Failed to register the product. Please try again.",
+          variant: "destructive",
+        })
+      }
     }
-  };
+  }
+
+  const formatPrice = (price: string, currency: Currency) => {
+    if (!price) return 'Price not set'
+    const numPrice = parseFloat(price)
+    return currency === 'JPY'
+      ? `￥${Math.round(numPrice).toLocaleString()}`
+      : `$${numPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -203,7 +194,7 @@ export default function ProductRegisterForm() {
                 <Label>Item Type</Label>
                 <RadioGroup
                   defaultValue={formData.type}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, itemType: value as 'webapp' | 'prompt' }))}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as ProductType }))}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="webapp" id="webapp" />
@@ -214,107 +205,154 @@ export default function ProductRegisterForm() {
                     <Label htmlFor="prompt">Prompt Collection</Label>
                   </div>
                 </RadioGroup>
+                {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="title">Name</Label>
                 <Input id="title" name="title" value={formData.title} onChange={handleInputChange} placeholder="Enter your item name" required />
+                {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" value={formData.description} onChange={handleInputChange} placeholder='Describe your item' />
+                <Textarea id="description" name="description" value={formData.description} onChange={handleInputChange} placeholder="Describe your item" required />
+                {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select name="category" value={formData.category} onValueChange={handleSelectChange('category')}>
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="productivity">Productivity</SelectItem>
+                    <SelectItem value="education">Education</SelectItem>
+                    <SelectItem value="entertainment">Entertainment</SelectItem>
+                    <SelectItem value="business">Business</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select name="category" value={formData.category} onValueChange={handleSelectChange('category')}>
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="productivity">Productivity</SelectItem>
-                      <SelectItem value="education">Education</SelectItem>
-                      <SelectItem value="entertainment">Entertainment</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Currency</Label>
+                  <RadioGroup
+                    defaultValue={formData.currency}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value as Currency }))}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="JPY" id="jpy" />
+                      <Label htmlFor="jpy">JPY (￥)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="USD" id="usd" />
+                      <Label htmlFor="usd">USD ($)</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price ($)</Label>
-                  <Input id="price" name="price" type="number" min="0" step="0.01" value={formData.price} onChange={handleInputChange} placeholder="0.00" required />
+                  <Label htmlFor="price">Price ({formData.currency === 'JPY' ? '￥' : '$'})</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="text"
+                    pattern="[0-9]*\.?[0-9]*"
+                    inputMode="decimal"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    placeholder={formData.currency === 'JPY' ? "0" : "0.00"}
+                    required
+                  />
+                  {errors.price && <p className="text-red-500 text-sm">{errors.price}</p>}
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="features">Key Features (comma-separated)</Label>
                 <Input id="features" name="features" value={formData.features} onChange={handleInputChange} placeholder="Feature 1, Feature 2, Feature 3" />
+                {errors.features && <p className="text-red-500 text-sm">{errors.features}</p>}
               </div>
 
               {formData.type === 'webapp' && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="demoUrl">Demo URL</Label>
-                    <Input id="demoUrl" name="demoUrl" type="url" value={formData.demoUrl} onChange={handleInputChange} placeholder="https://your-app-demo.com" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="image">Screenshots</Label>
-                    <div className="flex items-center space-x-4">
-                      <Input
-                        id="image"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                      />
-                      <Label
-                        htmlFor="image"
-                        className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
-                      >
-                        {imagePreview ? (
-                          <img src={imagePreview} alt="Screenshot preview" className="w-full h-full object-cover rounded-lg" />
-                        ) : (
-                          <Upload className="w-8 h-8 text-gray-400" />
-                        )}
-                      </Label>
-                      <span className="text-sm text-gray-500">Click to upload (PNG or JPG, up to 5)</span>
-                    </div>
-                  </div>
-                </>
+                <div className="space-y-2">
+                  <Label htmlFor="demoUrl">Demo URL</Label>
+                  <Input id="demoUrl" name="demoUrl" type="url" value={formData.demoUrl} onChange={handleInputChange} placeholder="https://your-app-demo.com" />
+                  {errors.demoUrl && <p className="text-red-500 text-sm">{errors.demoUrl}</p>}
+                </div>
               )}
+
+              <div className="space-y-2">
+                <Label htmlFor="images">Screenshots</Label>
+                <div className="flex items-center space-x-4">
+                  <Input
+                    id="images"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    multiple
+                  />
+                  <Label
+                    htmlFor="images"
+                    className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+                  >
+                    <Upload className="w-8 h-8 text-gray-400" />
+                  </Label>
+                  <span className="text-sm text-gray-500">Click to upload (PNG or JPG, up to 5)</span>
+                </div>
+                <div className="grid grid-cols-5 gap-4 mt-4">
+                  {formData.imageUrls.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img src={URL.createObjectURL(image)} alt={`Screenshot ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {errors.imageUrls && <p className="text-red-500 text-sm">{errors.imageUrls}</p>}
+              </div>
 
               {formData.type === 'prompt' && (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="promptCount">Number of Prompts</Label>
                     <Input id="promptCount" name="promptCount" type="number" min="1" value={formData.promptCount} onChange={handleInputChange} placeholder="Enter the number of prompts" required />
+                    {errors.promptCount && <p className="text-red-500 text-sm">{errors.promptCount}</p>}
                   </div>
 
-                  {promptPairs.map((pair, index) => (
+                  {formData.prompts.map((prompt, index) => (
                     <div key={index} className="space-y-2 border p-4 rounded-md">
                       <div className="flex justify-between items-center">
                         <Label>Prompt-Output Pair {index + 1}</Label>
                         {index > 0 && (
-                          <Button type="button" variant="ghost" size="sm" onClick={() => removePromptPair(index)}>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => removePrompt(index)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         )}
                       </div>
                       <Textarea
                         placeholder="Enter your prompt"
-                        value={pair.prompt}
-                        onChange={(e) => handlePromptPairChange(index, 'prompt', e.target.value)}
+                        value={prompt.input}
+                        onChange={(e) => handlePromptChange(index, 'input', e.target.value)}
                       />
+                      {errors[`prompts.${index}.input`] && <p className="text-red-500 text-sm">{errors[`prompts.${index}.input`]}</p>}
                       <Textarea
                         placeholder="Enter the expected output"
-                        value={pair.output}
-                        onChange={(e) => handlePromptPairChange(index, 'output', e.target.value)}
+                        value={prompt.output}
+                        onChange={(e) => handlePromptChange(index, 'output', e.target.value)}
                       />
+                      {errors[`prompts.${index}.output`] && <p className="text-red-500 text-sm">{errors[`prompts.${index}.output`]}</p>}
                       <div className="space-y-2">
                         <Label htmlFor={`promptImage-${index}`}>Output Image</Label>
                         <div className="flex items-center space-x-4">
@@ -329,8 +367,8 @@ export default function ProductRegisterForm() {
                             htmlFor={`promptImage-${index}`}
                             className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
                           >
-                            {pair.image ? (
-                              <img src={URL.createObjectURL(pair.image)} alt={`Prompt ${index + 1} output`} className="w-full h-full object-cover rounded-lg" />
+                            {prompt.imageUrl ? (
+                              <img src={prompt.imageUrl} alt={`Prompt ${index + 1} output`} className="w-full h-full object-cover rounded-lg" />
                             ) : (
                               <ImageIcon className="w-8 h-8 text-gray-400" />
                             )}
@@ -340,9 +378,10 @@ export default function ProductRegisterForm() {
                       </div>
                     </div>
                   ))}
-                  <Button type="button" variant="outline" onClick={addPromptPair}>
+                  <Button type="button" variant="outline" onClick={addPrompt}>
                     <Plus className="w-4 h-4 mr-2" /> Add Prompt-Output Pair
                   </Button>
+                  {errors.prompts && <p className="text-red-500 text-sm">{errors.prompts}</p>}
                 </>
               )}
 
@@ -364,22 +403,25 @@ export default function ProductRegisterForm() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {imagePreview && (
-                <img src={imagePreview} alt="Item preview" className="w-full h-64 object-cover rounded-lg" />
+              {formData.imageUrls.length > 0 && (
+                <div className="relative w-full h-64">
+                  <img src={URL.createObjectURL(formData.imageUrls[0])} alt="Item preview" className="w-full h-full object-cover rounded-lg" />
+                  {formData.imageUrls.length > 1 && (
+                    <div className="absolute bottom-2 left-2 right-2 flex justify-center">
+                      {formData.imageUrls.map((_, index) => (
+                        <div key={index} className="w-2 h-2 rounded-full bg-white mx-1" />
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
               <h2 className="text-2xl font-bold">{formData.title || 'Item Name'}</h2>
               <p className="text-gray-600">{formData.description || 'Item description will appear here'}</p>
               <div className="flex items-center space-x-2">
-                <DollarSign className="w-5 h-5 text-green-600" />
                 <span className="text-xl font-semibold text-green-600">
-                  {formData.price ? `$${Number(formData.price).toLocaleString()}` : 'Price not set'}
+                  {formatPrice(formData.price, formData.currency)}
                 </span>
               </div>
-              {formData.category && (
-                <div className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">
-                  {formData.category}
-                </div>
-              )}
               {formData.features && (
                 <div className="space-y-1">
                   <h3 className="font-semibold">Key Features:</h3>
@@ -398,24 +440,24 @@ export default function ProductRegisterForm() {
                   </a>
                 </div>
               )}
-              {formData.type === 'prompt' && promptPairs.length > 0 && (
+              {formData.type === 'prompt' && formData.prompts.length > 0 && (
                 <div className="space-y-4">
                   <h3 className="font-semibold">Prompt Preview:</h3>
                   <div className="border rounded-lg p-4 bg-gray-50">
                     <div className="space-y-2">
                       <div className="bg-blue-100 p-2 rounded">
                         <p className="font-medium">Prompt:</p>
-                        <p>{promptPairs[currentPromptPage].prompt || 'Your prompt will appear here'}</p>
+                        <p>{formData.prompts[currentPromptPage].input || 'Your prompt will appear here'}</p>
                       </div>
                       <div className="bg-green-100 p-2 rounded">
                         <p className="font-medium">Output:</p>
-                        <p>{promptPairs[currentPromptPage].output || 'Expected output will appear here'}</p>
+                        <p>{formData.prompts[currentPromptPage].output || 'Expected output will appear here'}</p>
                       </div>
-                      {promptPairs[currentPromptPage].image && (
+                      {formData.prompts[currentPromptPage].imageUrl && (
                         <div className="mt-2">
                           <p className="font-medium">Output Image:</p>
                           <img
-                            src={URL.createObjectURL(promptPairs[currentPromptPage].image)}
+                            src={formData.prompts[currentPromptPage].imageUrl}
                             alt={`Prompt ${currentPromptPage + 1} output`}
                             className="w-full h-48 object-cover rounded-lg mt-2"
                           />
@@ -432,13 +474,13 @@ export default function ProductRegisterForm() {
                       >
                         <ChevronLeft className="w-4 h-4 mr-2" /> Previous
                       </Button>
-                      <span>{currentPromptPage + 1} / {promptPairs.length}</span>
+                      <span>{currentPromptPage + 1} / {formData.prompts.length}</span>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPromptPage(prev => Math.min(promptPairs.length - 1, prev + 1))}
-                        disabled={currentPromptPage === promptPairs.length - 1}
+                        onClick={() => setCurrentPromptPage(prev => Math.min(formData.prompts.length - 1, prev + 1))}
+                        disabled={currentPromptPage === formData.prompts.length - 1}
                       >
                         Next <ChevronRight className="w-4 h-4 ml-2" />
                       </Button>
@@ -451,5 +493,5 @@ export default function ProductRegisterForm() {
         </Card>
       </div>
     </div>
-  );
+  )
 }
