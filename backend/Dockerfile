@@ -16,12 +16,11 @@ COPY prisma ./prisma
 # 依存関係をインストール
 RUN npm ci
 
-# Prismaのクライアント生成
-RUN npx prisma migrate deploy --schema=./prisma/schema.prisma
-RUN npx prisma generate --schema=./prisma/schema.prisma
-
 # アプリケーションコードをコピー
 COPY . .
+
+# Prismaのクライアント生成
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # アプリケーションをビルド
 RUN npm run build && npm run build:express
@@ -36,5 +35,5 @@ EXPOSE 3001
 USER node
 
 # アプリケーションを起動
-CMD ["npm", "run", "dev:express"]
+CMD ["npm", "run", "start:express"]
 
