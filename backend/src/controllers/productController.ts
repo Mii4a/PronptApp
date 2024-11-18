@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage }).fields([
-    { name: 'images', maxCount: 10 }, // Productのメイン画像（複数可）
+    { name: 'imageUrls[]', maxCount: 10 }, // Productのメイン画像（複数可）
     { name: 'promptImages', maxCount: 10 }, // 各Prompt用の画像（各プロンプトに1つ）
   ])
 
@@ -34,31 +34,35 @@ export const getProducts = async (req: Request, res: Response) => {
 };
 
 export const registerProduct = async (req: Request, res: Response) => {
-  console.log('received data:', req.body);
   upload(req, res, async (err) => {
     if (err) {
       console.error('File upload error:', err);
       return res.status(500).json({ message: 'File upload error' });
     }
     
-    const { title, price, description, features, type, demoUrl, promptCount, prompts } = req.body;
+    console.log('received data:', req.body);
+    const { title, price, description, features, type, demoUrl, promptCount, prompts, imageUrls } = req.body;
     const userId = (req as any).user.id || 1;
+
+    console.log('Request files:', req.files);
+    console.log('Request body:', req.body);
 
     try {
       // アップロードされた画像URLの取得
-      const uploadedImageUrls = req.files && 'images' in req.files ? 
-        (req.files['images'] as Express.Multer.File[]).map(file => `/uploads/${file.filename}`) : [];
+      const uploadedImageUrls = imageUrls ? 
+        (imageUrls as Express.Multer.File[]).map(file => `/uploads/${file.filename}`) : [];
 
-      const promptImagesUrls = req.files && 'promptImages' in req.files ?
-        (req.files['promptImages'] as Express.Multer.File[]).map(file => `/uploads/${file.filename}`) : [];
+      
+
+      const promptImagesUrls = prompts.imageUrl ?
+        (prompts.imageUrl as Express.Multer.File[]).map(file => `/uploads/${file.filename}`) : [];
       
       // プロンプトデータの整形
       const formattedPrompts = prompts ? prompts.map((prompt: any, index: number) => ({
-        prompts: prompt.input,
-        outputs: prompt.output,
+        input: prompt.input,
+        output: prompt.output,
         imageUrl: promptImagesUrls[index] || null,
       })) : [];
-
       // データベースへの保存
       const newProduct = await prisma.product.create({
         data: {
