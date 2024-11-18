@@ -10,12 +10,15 @@ WORKDIR /backend
 # package.json と package-lock.json をコピー
 COPY package*.json ./
 
+# Prismaのスキーマファイルとprismaディレクトリをコピー
+COPY prisma ./prisma
+
 # 依存関係をインストール
 RUN npm ci
 
 # Prismaのクライアント生成
-RUN npx prisma migrate deploy && npx prisma generate --schema=./prisma/schema.prisma
-
+RUN npx prisma migrate deploy --schema=./prisma/schema.prisma
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # アプリケーションコードをコピー
 COPY . .
