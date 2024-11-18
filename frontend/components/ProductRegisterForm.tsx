@@ -19,7 +19,7 @@ type ProductType = 'webapp' | 'prompt'
 type Prompt = {
   input: string;
   output: string;
-  imageUrl: File | null;
+  imageUrl: string | null;
 }
 
 type FormData = {
@@ -92,7 +92,7 @@ export default function ProductRegisterForm() {
     const file = event.target.files?.[0]
     if (file) {
       const newPrompts = [...formData.prompts]
-      newPrompts[index] = { ...newPrompts[index], imageUrl: file }
+      newPrompts[index] = { ...newPrompts[index], imageUrl: URL.createObjectURL(file) }
       setFormData(prev => ({ ...prev, prompts: newPrompts }))
     }
   }
@@ -122,54 +122,18 @@ export default function ProductRegisterForm() {
     // console.log('validatedData:', validatedData);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const uploadImage = async (file: File) => {
-      const formData = new FormData();
-      formData.append('image', file);
-  
-      try {
-        const response = await axios.post(`${apiUrl}/api/upload`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        return response.data.imageUrl;
-      } catch (error) {
-        console.error('画像のアップロードに失敗しました', error);
-        throw new Error('Failed to upload image');
-      }
-    };
-  
+    
     try {
-      // imageUrlsをアップロードしてURLを取得
-      const uploadedImageUrls = await Promise.all(
-        formData.imageUrls.map(async (file) => await uploadImage(file))
-      );
-  
-      // prompts.imageUrlをアップロードしてURLを取得
-      const uploadedPrompts = await Promise.all(
-        formData.prompts.map(async (prompt) => {
-          if (prompt.imageUrl && prompt.imageUrl instanceof File) {
-            const uploadedUrl = await uploadImage(prompt.imageUrl);
-            return { ...prompt, imageUrl: uploadedUrl };
-          }
-          return prompt;
-        })
-      );
-  
-      // 登録用のデータを準備
-      const productData = {
+      await axios.post(`${apiUrl}/api/products/register`, {
         ...formData,
         type: formData.type === 'webapp' ? 'WEBAPP' : 'PROMPT',
         promptCount: formData.type === 'prompt' ? formData.promptCount : undefined,
-        prompts: formData.type === 'prompt' ? uploadedPrompts : undefined,
-        imageUrls: uploadedImageUrls,
-      };
-  
-      // Productの登録リクエストを送信
-      await axios.post(`${apiUrl}/api/products/register`, productData, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
+        prompts: formData.type === 'prompt' ? formData.prompts : undefined,
+      }, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true
       });
+
       console.log('Product registered successfully');
       toast({
         title: "Success",
@@ -404,7 +368,7 @@ export default function ProductRegisterForm() {
                             className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
                           >
                             {prompt.imageUrl ? (
-                              <img src={`${apiUrl}${imageUrl}`} alt={`Prompt ${index + 1} output`} className="w-full h-full object-cover rounded-lg" />
+                              <img src={prompt.imageUrl} alt={`Prompt ${index + 1} output`} className="w-full h-full object-cover rounded-lg" />
                             ) : (
                               <ImageIcon className="w-8 h-8 text-gray-400" />
                             )}
