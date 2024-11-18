@@ -1,9 +1,9 @@
-import LoginForm from '@/components/LoginForm';
+import UserLoginForm from '@/components/UserLoginForm';
 
 const LoginPage: React.FC = () => {
     return (
         <div>
-            <LoginForm />
+            <UserLoginForm />
         </div>
     );
 }

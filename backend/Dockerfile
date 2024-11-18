@@ -5,9 +5,6 @@ FROM node:22-alpine
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
 
-# ホストのUIDとGIDを受け取る
-ARG UID=989
-ARG GID=989
 
 # 必要なパッケージをインストール
 RUN apk add --no-cache sudo
@@ -25,7 +22,7 @@ RUN npm ci
 COPY . .
 
 # アプリケーションをビルド
-RUN npm run build
+RUN npm run build:express
 
 # ビルド済みのファイルを一時ディレクトリにコピー
 RUN cp -r .next /tmp/next
@@ -37,5 +34,5 @@ EXPOSE 3001
 USER node
 
 # アプリケーションを起動
-CMD ["npm", "run", "start:express"]
+CMD ["node", "dist/server.js"]
 

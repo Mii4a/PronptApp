@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import prisma from '../lib/db';
 import bcrypt from 'bcrypt';
 import * as yup from 'yup';
-import jwt from 'jsonwebtoken';
 
 // バリデーションスキーマの作成
 const signupSchema = yup.object().shape({
@@ -12,14 +11,14 @@ const signupSchema = yup.object().shape({
     .string()
     .min(8)
     .matches(/[a-z]/, 'Password must contain a lowercase letter')
-    .matches(/[0-9]/, 'Password must contain a number')
+    .matches(/[0-9]/, 'Password must contain a number'),
 });
 
-
-// signup
+// サインアップ（ユーザー登録）機能
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   try {
+    
     // バリデーションを実行
     await signupSchema.validate({ name, email, password });
 
@@ -35,6 +34,8 @@ export const signup = async (req: Request, res: Response) => {
       },
     });
 
+    // セッションにユーザーIDとユーザー名を保存
+    req.session.user = { id: newUser.id, name: newUser.name };
     res.status(201).json({ message: 'User signed up successfully!', user: newUser });
   } catch (error) {
     if (error instanceof yup.ValidationError) {
@@ -44,8 +45,7 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-
-// login 
+// ログイン機能
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
@@ -64,57 +64,33 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // トークンの生成
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '1h' }
-    );
-
-    // アクセストークンの生成
-    const accessToken = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '1h' }
-    );
-
-    // リフレッシュトークンの生成
-    const refreshToken = jwt.sign(
-      { id: user.id },
-      process.env.JWT_REFRESH_SECRET as string,
-      { expiresIn: '7d' } // 7日間の有効期限
-    );
-
-    //リフレッシュトークンをデータベースに保存
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken },
-    });
-
-    // Cookieにアクセストークンとリフレッシュトークンを保存
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 1000,
-      sameSite: 'strict',
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: 'strict',
-    });
-
-    res.status(200).json({ message: 'Login successful', token });
+    // セッションにユーザー情報を保存
+    req.session.user = { id: user.id, name: user.name, role: user.role };
+    res.status(200).json({ message: 'Login successful', user: req.session.user });
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
+export const getSettion = async (req: Request, res: Response) => {
+  if (req.session && req.session.user) {
+    // セッションが存在し、ユーザー情報が含まれている場合、ユーザー情報を返す
+    res.status(200).json({ user: req.session.user });
+  } else {
+    res.status(401).json({ message: 'Not authenticated' });
+  }
+}
+
+// ログアウト機能
 export const logout = async (req: Request, res: Response) => {
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
-  res.status(200).json({ message: 'Logout successful' });
+  // セッションの削除
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error during logout:', err);
+      return res.status(500).json({ message: 'Logout failed' });
+    }
+    res.clearCookie('connect.sid'); // セッションIDのCookieを削除
+    res.status(200).json({ message: 'Logout successful' });
+  });
 };

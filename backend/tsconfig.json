@@ -9,8 +9,8 @@
     "target": "ESNext", // JavaScriptのターゲットバージョン
     "typeRoots": [
       "./node_modules/@types",
-      "./types",
-      "./node_modules/yup"
+      "./src/types/",
+      "./src/types/express-session.d.ts"
     ], // 型定義ファイルを検索するディレクトリを指定
     "module": "CommonJS", // サーバーサイドなのでCommonJSモジュールを使用
     "strict": true, // 厳格な型チェック
@@ -22,7 +22,7 @@
     "rootDir": "./", // ソースファイルのルートディレクトリ
     "resolveJsonModule": true, // JSONモジュールをインポート可能にする
     "isolatedModules": true, // 各ファイルを個別にコンパイル
-    "noEmit": true // 実際にはファイル出力を行わない
+    "noEmit": false // 実際にはファイル出力を行わない
     ,
     "lib": [
       "dom",
@@ -34,8 +34,9 @@
     "jsx": "preserve"
   },
   "include": [
-    "src/**/*.ts",
-    "types/**/*.d.ts"
+    "./server",
+    "./src/**/*.ts",
+    "src/types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules"
