@@ -14,14 +14,13 @@ RUN apk add --no-cache sudo
 # 作業ディレクトリを作成
 WORKDIR /frontend
 
-# package.jsonとpackage-lock.jsonをコピー
+# package.jsonをコピー, 依存関係をインストール
 COPY package*.json ./
-
-# 依存関係をインストール
 RUN npm ci
 
 # アプリケーションのコードをコピー
 COPY . .
+
 
 # アプリケーションをビルド
 RUN npm run build
