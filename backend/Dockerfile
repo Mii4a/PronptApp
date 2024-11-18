@@ -1,11 +1,6 @@
 # ベースイメージ
 FROM node:22-alpine
 
-# 環境変数を設定
-ARG NODE_ENV
-ENV NODE_ENV=$NODE_ENV
-
-
 # 必要なパッケージをインストール
 RUN apk add --no-cache sudo
 
@@ -16,13 +11,13 @@ WORKDIR /backend
 COPY package*.json ./
 
 # 依存関係をインストール
-RUN npm ci
+RUN npm i
 
 # アプリケーションコードをコピー
 COPY . .
 
 # アプリケーションをビルド
-RUN npm run build:express
+RUN npm run build && npm run build:express
 
 # ビルド済みのファイルを一時ディレクトリにコピー
 RUN cp -r .next /tmp/next
@@ -34,5 +29,5 @@ EXPOSE 3001
 USER node
 
 # アプリケーションを起動
-CMD ["node", "dist/server.js"]
+CMD ["npm", "run", "dev:express"]
 

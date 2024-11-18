@@ -1,11 +1,26 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/db';
 import Stripe from 'stripe';
-import jwt from 'jsonwebtoken';
-import { string } from 'yup';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // 画像を保存するディレクトリ
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage }).fields([
+    { name: 'images', maxCount: 10 }, // Productのメイン画像（複数可）
+    { name: 'promptImages', maxCount: 10 }, // 各Prompt用の画像（各プロンプトに1つ）
+  ])
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-09-30.acacia',
+  apiVersion: '2024-10-28.acacia',
 });
 
 export const getProducts = async (req: Request, res: Response) => {
@@ -18,29 +33,59 @@ export const getProducts = async (req: Request, res: Response) => {
   }
 };
 
-export const sellProduct = async (req: Request, res: Response) => {
-  const { title, price, user, creatorName, description, content } = req.body;
-  const userId = (req as any).user.id;
+export const registerProduct = async (req: Request, res: Response) => {
+  console.log('received data:', req.body);
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error('File upload error:', err);
+      return res.status(500).json({ message: 'File upload error' });
+    }
+    
+    const { title, price, description, features, type, demoUrl, promptCount, prompts } = req.body;
+    const userId = (req as any).user.id || 1;
 
-  try {
-    const newProduct = await prisma.product.create({
-      data: {
-        title,
-        price,
-        userId,
-        user,
-        creatorName,
-        description,
-        content,
-        type: 'PROMPT',
-        status: 'DRAFT',
-      },
-    });
-    res.status(201).json({ message: 'Product sold successfully!', product: newProduct });
-  } catch (error) {
-    console.error('Error selling product:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
+    try {
+      // アップロードされた画像URLの取得
+      const uploadedImageUrls = req.files && 'images' in req.files ? 
+        (req.files['images'] as Express.Multer.File[]).map(file => `/uploads/${file.filename}`) : [];
+
+      const promptImagesUrls = req.files && 'promptImages' in req.files ?
+        (req.files['promptImages'] as Express.Multer.File[]).map(file => `/uploads/${file.filename}`) : [];
+      
+      // プロンプトデータの整形
+      const formattedPrompts = prompts ? prompts.map((prompt: any, index: number) => ({
+        prompts: prompt.input,
+        outputs: prompt.output,
+        imageUrl: promptImagesUrls[index] || null,
+      })) : [];
+
+      // データベースへの保存
+      const newProduct = await prisma.product.create({
+        data: {
+          title,
+          price: parseFloat(price),
+          description,
+          features,
+          type,
+          status: 'DRAFT',
+          demoUrl,
+          promptCount: parseInt(promptCount),
+          imageUrls: uploadedImageUrls,
+          user: {
+            connect: { id: userId },
+          },
+          prompts: {
+            create: formattedPrompts, // プロンプトデータを作成
+          },
+        },
+      });
+
+      res.status(201).json({ message: 'Product registered successfully!', product: newProduct });
+    } catch (error) {
+      console.error('Error registering product:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 };
 
 export const purchaseProduct = async (req: Request, res: Response) => {

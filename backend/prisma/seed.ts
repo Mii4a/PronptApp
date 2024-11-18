@@ -4,7 +4,6 @@ import bcrypt from 'bcrypt';
 // データベースに接続
 const prisma = new PrismaClient();
 
-
 async function main() {
   const password = await bcrypt.hash("password123", 10);
 
@@ -25,7 +24,6 @@ async function main() {
       },
     ],
   });
-
   console.log("seedユーザーの作成が完了しました。");
 }
 
@@ -35,4 +33,7 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-  });
+});
+
+
+

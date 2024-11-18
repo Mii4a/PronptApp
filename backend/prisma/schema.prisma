@@ -15,14 +15,20 @@ enum UserRole {
 }
 
 enum ProductType {
+  WEBAPP
   PROMPT
-  APP
 }
 
 enum ProductStatus {
   DRAFT
   PUBLISHED
   SOLD
+}
+
+// 通貨の種類を表す列挙型
+enum Currency {
+  JPY  // 日本円
+  USD  // 米ドル
 }
 
 model User {
@@ -41,21 +47,36 @@ model User {
 }
 
 model Product {
-  id           Int          @id @default(autoincrement())
-  userId       Int
-  user         User         @relation(fields: [userId], references: [id])
-  title        String
-  price        Float
-  creatorName  String
-  description  String
-  content      String
-  type         ProductType  @default(PROMPT)
-  status       ProductStatus @default(DRAFT)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id            Int            @id @default(autoincrement())
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id])
+  title         String
+  price         Float                           // 価格の値（数値のみ）
+  currency      Currency       @default(JPY)    // 通貨の種類（円またはドル）
+  description   String
+  features      String?
+  type          ProductType    @default(PROMPT)
+  status        ProductStatus  @default(DRAFT)
+  demoUrl       String?        // WebアプリのデモURL（オプション）
+  promptCount   Int?           // プロンプトの数（オプション）
+  prompts       Prompt[]       // Prompt モデルとのリレーション
+  imageUrls     String[]       // アップロードされた画像のURL
 
-  transactions Transaction[]
-  userProducts UserProduct[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  transactions  Transaction[]
+  userProducts  UserProduct[] 
+}
+
+
+model Prompt {
+  id           Int       @id @default(autoincrement())
+  productId    Int
+  product      Product   @relation(fields: [productId], references: [id])
+  input        String
+  output       String
+  imageUrl     String?
 }
 
 model Transaction {

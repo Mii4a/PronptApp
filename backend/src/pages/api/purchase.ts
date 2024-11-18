@@ -5,7 +5,7 @@ import Stripe from 'stripe';
 
 // Stripeインスタンスの作成
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-09-30.acacia', // 最新のAPIバージョンを指定
+  apiVersion: '2024-10-28.acacia', // 最新のAPIバージョンを指定
 });
 
 type Product = {
