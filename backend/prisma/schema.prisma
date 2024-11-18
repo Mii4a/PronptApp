@@ -25,6 +25,12 @@ enum ProductStatus {
   SOLD
 }
 
+// 通貨の種類を表す列挙型
+enum Currency {
+  JPY  // 日本円
+  USD  // 米ドル
+}
+
 model User {
   id           Int          @id @default(autoincrement())
   email        String       @unique
@@ -45,28 +51,32 @@ model Product {
   userId        Int
   user          User           @relation(fields: [userId], references: [id])
   title         String
-  price         Float
+  price         Float                           // 価格の値（数値のみ）
+  currency      Currency       @default(JPY)    // 通貨の種類（円またはドル）
   description   String
   features      String?
   type          ProductType    @default(PROMPT)
   status        ProductStatus  @default(DRAFT)
+  demoUrl       String?        // WebアプリのデモURL（オプション）
+  promptCount   Int?           // プロンプトの数（オプション）
+  prompts       Prompt[]       // Prompt モデルとのリレーション
+  imageUrls     String[]       // アップロードされた画像のURL
+
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   transactions  Transaction[]
-  userProducts  UserProduct[]
-  demoUrl       String?        // WebアプリのデモURL（オプション）
-  promptCount   Int?           // プロンプトの数（オプション）
-  prompts       Prompt[]       // Prompt モデルとのリレーション
-  imageUrl      String?        // アップロードされた画像のURL
+  userProducts  UserProduct[] 
 }
 
+
 model Prompt {
-  id          Int      @id @default(autoincrement())
-  productId   Int
-  product     Product   @relation(fields: [productId], references: [id])
-  prompt      String
-  output      String
+  id           Int       @id @default(autoincrement())
+  productId    Int
+  product      Product   @relation(fields: [productId], references: [id])
+  input        String
+  output       String
+  imageUrl     String?
 }
 
 model Transaction {
