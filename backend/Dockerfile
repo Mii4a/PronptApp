@@ -11,7 +11,11 @@ WORKDIR /backend
 COPY package*.json ./
 
 # 依存関係をインストール
-RUN npm i
+RUN npm ci
+
+# Prismaのクライアント生成
+RUN npx prisma generate
+
 
 # アプリケーションコードをコピー
 COPY . .

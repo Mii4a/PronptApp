@@ -20,9 +20,6 @@ COPY package*.json ./
 # 依存関係をインストール
 RUN npm ci
 
-# Prismaのクライアント生成
-RUN npx prisma generate
-
 # アプリケーションのコードをコピー
 COPY . .
 
