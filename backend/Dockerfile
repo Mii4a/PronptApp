@@ -14,7 +14,7 @@ COPY package*.json ./
 RUN npm ci
 
 # Prismaのクライアント生成
-RUN npx prisma generate
+RUN npx prisma migrate deploy && npx prisma generate --schema=./prisma/schema.prisma
 
 
 # アプリケーションコードをコピー
