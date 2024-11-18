@@ -25,7 +25,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await prisma.product.findMany();
+    const products = await prisma.product.findMany({
+      include: {
+        user: true
+      },
+  });
     res.status(200).json(products);
   } catch (error) {
     console.error('Error fetching products:', error);

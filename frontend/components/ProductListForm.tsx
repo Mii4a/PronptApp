@@ -27,6 +27,7 @@ type SortOrder = 'asc' | 'desc'
 const fetchProducts = async (): Promise<Product[]> => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
   const { data } = await axios.get(`${apiUrl}/api/products`)
+  console.log('Fetched products:', data)
   return data
 }
 
@@ -117,12 +118,6 @@ export default function ProductListForm() {
                   <span className="text-gray-400">No image</span>
                 </div>
               )}
-              <Badge 
-                className="absolute top-2 right-2" 
-                variant={product.type === 'WEBAPP' ? 'default' : 'secondary'}
-              >
-                {product.type}
-              </Badge>
             </div>
             <CardContent className="p-4">
               <h3 className="font-semibold text-lg mb-1 truncate">{product.title}</h3>
