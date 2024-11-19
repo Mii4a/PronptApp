@@ -1,10 +1,10 @@
 import React from 'react';
-import '../styles/globals.css'; // Global CSSはここでインポート
+import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
-import { QueryClient, QueryClientProvider } from 'react-query'
-import { ReactQueryDevtools } from 'react-query/devtools'
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -12,5 +12,5 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <Component {...pageProps} />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
-  )
+  );
 }

@@ -1,14 +1,15 @@
-import React, { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { useRouter } from 'next/router'
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/router';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import Link from 'next/link'
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { GoogleOAuthButton } from "@/components/ui/oauth/GoogleOAuthButton";
+import Link from 'next/link';
 import axios from 'axios';
 
 // Yupでバリデーションスキーマを作成
@@ -22,11 +23,6 @@ export default function UserLoginForm() {
     resolver: yupResolver(schema)
   })
   const router = useRouter();
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
-
-  useEffect(() => {
-    console.log("ApiUrl:", apiUrl)
-  }, [])
 
   const onSubmit = async (data: any) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL
@@ -102,9 +98,7 @@ export default function UserLoginForm() {
             <span className="px-2 text-gray-500 text-sm">OR</span>
             <hr className="w-full border-t border-gray-300" />
           </div>
-          <Button variant="outline" className="w-full">
-            Continue with Google
-          </Button>
+          <GoogleOAuthButton />
         </CardFooter>
       </Card>
     </div>

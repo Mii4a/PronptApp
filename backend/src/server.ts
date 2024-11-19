@@ -1,8 +1,13 @@
-import express from 'express';
+import express, { ErrorRequestHandler } from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import RedisStore from 'connect-redis';
 import { createClient } from '@redis/client';
+import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import authRoutes from './routes/authRoutes';
+import productRoutes from './routes/productRoutes';
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -10,6 +15,13 @@ const PORT = process.env.PORT || 3001;
 console.log('TypeScript server is running...');
 console.log('Environment:', process.env.NODE_ENV);
 
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// // Passportのセットアップ
+app.use(passport.initialize());
+app.use(passport.session());
 
 const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://redis:6379',
@@ -64,12 +76,17 @@ app.use(
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: err.message || 'Internal server error' });
+};
+
+
+// エラーハンドリングミドルウェア
+app.use(errorHandler);
+
 
 // ルーティング設定
-import authRoutes from './routes/authRoutes';
-import productRoutes from './routes/productRoutes';
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 
