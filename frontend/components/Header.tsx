@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ interface UserSession {
   }
   
 
-export default function Header() {
+export const Header: React.FC = () => {
   const [session, setSession] = useState<UserSession | null>(null);
   const [loading, setLoading] = useState(true);
 

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/db';
 import bcrypt from 'bcrypt';
 import * as yup from 'yup';
@@ -44,8 +44,9 @@ const signupSchema = yup.object().shape({
 });
 
 // サインアップ（ユーザー登録）機能
-export const signup = async (req: Request, res: Response) => {
+export const signup = async (req: Request, res: Response, next: NextFunction) => {
   const { name, email, password } = req.body;
+  console.log(req.body)
   try {
     // バリデーションを実行
     await signupSchema.validate({ name, email, password });
@@ -61,6 +62,7 @@ export const signup = async (req: Request, res: Response) => {
         password: passwordHash,
       },
     });
+    console.log(newUser);
     
     // 動作確認用
     (req.session as any).user = { id: newUser.id, name: newUser.name };
@@ -73,11 +75,12 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ message: error.message });
     }
     res.status(500).json({ message: 'Registration failed', error });
+    next(error);
   }
 };
 
 // ログイン機能
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
 
   try {
@@ -91,7 +94,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // パスワードの照合
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user.password!);
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -102,6 +105,7 @@ export const login = async (req: Request, res: Response) => {
     try {
       await ensureRedisConnection();
     } catch (err) {
+      next(err);
       return res.status(500).json({ message: 'Failed to connect to Redis' });
     }
 
@@ -137,19 +141,82 @@ export const login = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error during login:', error);
+    next(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-// セッション確認機能
-export const getSession = async (req: Request, res: Response) => {
-  if (req.session && req.session.user) {
-    // セッションが存在し、ユーザー情報が含まれている場合、ユーザー情報を返す
-    res.status(200).json({ user: req.session.user });
-  } else {
-    console.log('Session after login:', req.session);
-    res.status(401).json({ message: 'Not authenticated' });
+// セッション取得機能
+export const getSession = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (req.session && req.session.user) {
+      // セッションが存在し、ユーザー情報が含まれている場合、ユーザー情報を返す
+      res.status(200).json({ user: req.session.user });
+    } else {
+      console.log('Session after login:', req.session);
+      res.status(401).json({ message: 'Not authenticated' });
+    }
+  } catch (err) {
+    next(err);
   }
+};
+
+export const googleOAuth = async (profile: any, req: Request) => {
+  const { id: googleId, displayName: name, emails } = profile;
+  const email = emails?.[0]?.value || '';
+
+  // Google IDで既存ユーザーを検索
+  const existingUserByGoogleId = await prisma.user.findUnique({
+    where: { googleId },
+  });
+
+  if (existingUserByGoogleId) {
+    // セッションに保存
+    req.session.user = {
+      id: existingUserByGoogleId.id,
+      name: existingUserByGoogleId.name,
+      role: existingUserByGoogleId.role || 'USER',
+    };
+    return existingUserByGoogleId;
+  }
+
+  // Google IDが見つからない場合、emailで検索
+  const existingUserByEmail = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (existingUserByEmail) {
+    // メールアドレスで見つかった場合はGoogle IDを紐付け
+    const updatedUser = await prisma.user.update({
+      where: { email },
+      data: { googleId },
+    });
+
+    // セッションに保存
+    req.session.user = {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      role: updatedUser.role || 'USER',
+    };
+    return updatedUser;
+  }
+
+  // Google IDもemailも見つからない場合は新規作成
+  const newUser = await prisma.user.create({
+    data: {
+      googleId,
+      email,
+      name: name || 'Unknown User',
+    },
+  });
+
+  // セッションに保存
+  req.session.user = {
+    id: newUser.id,
+    name: newUser.name,
+    role: newUser.role || 'USER',
+  };
+  return newUser;
 };
 
 // ログアウト機能
@@ -164,3 +231,12 @@ export const logout = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Logout successful' });
   });
 };
+
+//ユーザーがセッション保存済みか確認
+export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session || !req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  req.user = req.session.user;
+  next();
+}

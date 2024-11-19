@@ -1,5 +1,5 @@
 # Node.js 23の軽量イメージを使用
-FROM node:23-alpine
+FROM node:22-alpine
 
 # 環境変数を設定    
 ARG NODE_ENV
@@ -16,7 +16,7 @@ WORKDIR /frontend
 
 # package.jsonをコピー, 依存関係をインストール
 COPY package*.json ./
-RUN npm ci
+RUN npm i
 
 # アプリケーションのコードをコピー
 COPY . .

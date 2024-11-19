@@ -1,11 +1,29 @@
-import Link from 'next/link';
+import Link from 'next/link';;
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, ShoppingCart, User } from 'lucide-react';
-import Header from "@/components/Header";
+import { Header } from "@/components/Header";
+import axios from 'axios';
+import { GetServerSideProps } from 'next';
+import React from 'react';
 
-export default function Home() {
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  try {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+    const { data: user } = await axios.get(`${backendUrl}/auth/session`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    });
+
+    return { props: { user } };
+  } catch {
+    return { props: { user: null } };
+  }
+};
+
+const Home: React.FC<{ user: any }> = ({ user }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -97,3 +115,4 @@ export default function Home() {
     </div>
   )
 }
+export default Home
