@@ -1,3 +1,4 @@
+import { Session } from 'express-session';
 import { Router } from 'express';
 import passport from '../passport';
 import asyncHandler from '../util/asyncHandler';
@@ -16,10 +17,15 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 
 router.get(
   '/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'], 
+    accessType: 'offline',
+    prompt: 'consent',
+    failureRedirect: '/login' }),
   (req, res) => {
     // 認証成功後のリダイレクト処理
-    res.redirect(`${process.env.FRONTEND_URL}/auth/google/callback`); // フロントエンドのURLにリダイレクト
+    console.log('Google OAuth callback query:', req.query);
+    res.redirect(`${process.env.FRONTEND_URL}/products`); // フロントエンドのURLにリダイレクト
   }
 );
 

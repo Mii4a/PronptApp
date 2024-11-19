@@ -18,6 +18,7 @@ services:
       - '3000:3000'
 
   backend:
+    mem_limit: 1g
     build: 
       context: ./backend
       args:

@@ -2,7 +2,7 @@ import Link from 'next/link';;
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import Header from "@/components/Header";
+import { Header } from "@/components/Header";
 import axios from 'axios';
 import { GetServerSideProps } from 'next';
 import React from 'react';
@@ -26,7 +26,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const Home: React.FC<{ user: any }> = ({ user }) => {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header user={user}/>
+      <Header />
 
       <main className="flex-grow">
         <section className="bg-primary text-primary-foreground py-16">

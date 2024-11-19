@@ -1,5 +1,5 @@
 # Node.js 23の軽量イメージを使用
-FROM node:23-alpine
+FROM node:22-alpine
 
 # 環境変数を設定    
 ARG NODE_ENV
@@ -21,8 +21,12 @@ RUN npm i
 # アプリケーションのコードをコピー
 COPY . .
 
+
 # アプリケーションをビルド
 RUN npm run build
+
+# ビルド済みのファイルを一時ディレクトリにコピー
+RUN cp -r .next /tmp/next
 
 # 3000ポートを公開
 EXPOSE 3000

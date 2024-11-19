@@ -21,7 +21,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: '/auth/google/callback',
+      callbackURL: 'http://localhost:3001/api/auth/google/callback',
       passReqToCallback: true, // reqを渡すために必要
     },
     async (req, accessToken, refreshToken, profile, done) => {

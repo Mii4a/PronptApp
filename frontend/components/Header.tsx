@@ -1,12 +1,43 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Search, ShoppingCart, User } from 'lucide-react';
 
-interface HeaderProps {
-  user: { id:number; name:string } | null;
-}
+// セッションの型定義
+interface UserSession {
+    user: {
+      id: number;
+      name: string;
+      role?: string;
+    };
+  }
+  
 
-export default function Header({ user }: HeaderProps) {
+export const Header: React.FC = () => {
+  const [session, setSession] = useState<UserSession | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      
+      try {
+        const response = await axios.get(`${apiUrl}/api/auth/session`, { withCredentials: true });
+        setSession(response.data); // セッションデータを保存
+      } catch (error) {
+        console.error('Failed to fetch session:', error);
+        setSession(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSession();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+
   return (
     <header className="bg-background border-b sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -31,11 +62,11 @@ export default function Header({ user }: HeaderProps) {
             </Link>
           </Button>
 
-          {user ? (
+          {session ? (
             <Button variant="ghost" asChild>
               <Link href="/profile">
                 <User className="h-5 w-5 mr-2" />
-                {user.name}
+                {session.user.name}
               </Link>
             </Button>
           ) : (

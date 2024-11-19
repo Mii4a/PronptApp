@@ -1,7 +1,7 @@
 import React from 'react';
 
 import ProductListForm from '@/components/ProductListForm';
-import Header from '@/components/Header'
+import { Header } from '@/components/Header'
 import { GetServerSideProps } from 'next';
 import axios from 'axios';
 
@@ -23,7 +23,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const MyProductsPage: React.FC<{ user: any }> = ({ user }) => {
   return (
     <div>
-      <Header user={user}/>
+      <Header />
       <ProductListForm />
     </div>
   );

@@ -19,10 +19,6 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// // Passportのセットアップ
-app.use(passport.initialize());
-app.use(passport.session());
-
 const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://redis:6379',
   socket: {
@@ -85,6 +81,9 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
 // エラーハンドリングミドルウェア
 app.use(errorHandler);
 
+// // Passportのセットアップ
+app.use(passport.initialize());
+app.use(passport.session());
 
 // ルーティング設定
 app.use('/api/auth', authRoutes);

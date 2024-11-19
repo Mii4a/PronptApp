@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction, Router }from 'express';
 import multer from 'multer'; // 画像等のファイルデータのミドルウェア
 import asyncHandler from '../util/asyncHandler';
-import { isAuthenticated } from '@/src/controllers/authController';
-import {getProducts, registerProduct, purchaseProduct, getUserProducts } from '@/src/controllers/productController';
+import { isAuthenticated } from '../controllers/authController';
+import {getProducts, registerProduct, purchaseProduct, getUserProducts } from '../controllers/productController';
 
 
 const router = Router();

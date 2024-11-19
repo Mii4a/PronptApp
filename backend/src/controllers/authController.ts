@@ -46,6 +46,7 @@ const signupSchema = yup.object().shape({
 // サインアップ（ユーザー登録）機能
 export const signup = async (req: Request, res: Response, next: NextFunction) => {
   const { name, email, password } = req.body;
+  console.log(req.body)
   try {
     // バリデーションを実行
     await signupSchema.validate({ name, email, password });
@@ -61,6 +62,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
         password: passwordHash,
       },
     });
+    console.log(newUser);
     
     // 動作確認用
     (req.session as any).user = { id: newUser.id, name: newUser.name };
