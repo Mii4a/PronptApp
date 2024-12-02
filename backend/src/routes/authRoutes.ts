@@ -15,6 +15,8 @@ router.delete('/logout', logout)
 // Google OAuthエンドポイント
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
+// - 'accessType': 'offline'を指定することで、リフレッシュトークンを取得可能。
+// - 'prompt': 'consent'を指定することで、毎回ユーザーに同意を求める。
 router.get(
   '/google/callback',
   passport.authenticate('google', { 

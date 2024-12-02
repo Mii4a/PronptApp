@@ -21,7 +21,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: `${process.env.FRONTEND_URL}/api/auth/google/callback`,
+      callbackURL: `${process.env.GOOGLE_CALLBACK_URL}`,
       passReqToCallback: true, // reqを渡すために必要
     },
     async (req, accessToken, refreshToken, profile, done) => {
@@ -30,6 +30,7 @@ passport.use(
         const user = await googleOAuth(profile, req);
         done(null, user);
       } catch (error) {
+        
         done(error, undefined);
       }
     }

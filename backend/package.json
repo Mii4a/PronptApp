@@ -10,7 +10,7 @@
     "start": "NODE_ENV=production next start -p 3001",
     "db:seed": "ts-node prisma/seed.ts",
     "start:express": "NODE_ENV=production node dist/server.js",
-    "dev:express": "nodemon",
+    "dev:express": "NODE_ENV=development nodemon",
     "build:express": "tsc -p ./tsconfig.json"
   },
   "keywords": [],
