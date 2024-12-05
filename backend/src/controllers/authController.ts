@@ -2,21 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/db';
 import bcrypt from 'bcrypt';
 import * as yup from 'yup';
-import { createClient } from '@redis/client';
+import redisClient from '@/src/util/redisClient';
 
-// Redis クライアント作成
-const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://redis:6379',
-  socket: {
-    connectTimeout: 20000,
-    reconnectStrategy: (retries) => {
-      if (retries > 10) {
-        return new Error('Retry limit exhausted');
-      }
-      return Math.min(retries * 500, 5000);
-    },
-  },
-});
 
 // Redisクライアント接続の確保
 const ensureRedisConnection = async () => {
@@ -63,7 +50,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
       },
     });
     console.log(newUser);
-    
+
     // 動作確認用
     (req.session as any).user = { id: newUser.id, name: newUser.name };
 
@@ -119,7 +106,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     // Redis にセッションデータを保存
     try {
       await redisClient.set(`user-session:${user.id}`, JSON.stringify(sessionData), {
-        EX: 86400, // セッションの有効期限（秒単位、1日）
+        EX: 86400, // セッションの有効期限（秒単、1日）
       });
       console.log('Data saved in Redis successfully');
     } catch (err) {
@@ -146,20 +133,85 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
+// ログアウト機能
+export const logout = async (req: Request, res: Response) => {
+  // セッションの削除
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error during logout:', err);
+      return res.status(500).json({ message: 'Logout failed' });
+    }
+    res.clearCookie('connect.sid'); // セッションIDのCookieを削除
+    res.status(200).json({ message: 'Logout successful' });
+  });
+};
+
 // セッション取得機能
 export const getSession = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (req.session && req.session.user) {
       // セッションが存在し、ユーザー情報が含まれている場合、ユーザー情報を返す
-      res.status(200).json({ user: req.session.user });
+      return res.status(200).json({ user: req.session.user });
     } else {
-      console.log('Session after login:', req.session);
-      res.status(401).json({ message: 'Not authenticated' });
+      // Redisからセッションを取得
+      const userId = req.session?.user?.id;
+      if (userId) {
+        const sessionData = await redisClient.get(`user-session:${userId}`);
+        if (sessionData) {
+          const user = JSON.parse(sessionData);
+          return res.status(200).json({ user });
+        }
+      }
+      console.log('Error: Session after login', req.session);
+      return res.status(401).json({ message: 'Not authenticated' });
     }
   } catch (err) {
     next(err);
   }
 };
+
+export const saveSessionToRedis = async (
+  userId: number,
+  sessionData: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    await redisClient.set(`user-session:${userId}`, JSON.stringify(sessionData), {
+      EX: 86400, // セッションの有効期限(秒単位,1日)
+    });
+    console.log('Data saved in Redis successfully')
+  } catch (err) {
+    console.error('Error saving session data to Redis:', err);
+    res.status(500).json({ message: 'Failed to save session data in Redis' })
+    throw err;
+  }
+
+  req.session.save((err) => {
+    if (err) {
+      console.error('Error saving session:', err);
+      res.status(500).json({ message: 'Failsed to save session' })
+      return;
+    }
+    console.log('Session saved successfully');
+    res.status(200).json({ message: 'Login successful', user: sessionData })
+  })
+}
+
+export const checkSessionInRedis = async (userId: number) => {
+  try {
+    const sessionData = await redisClient.get(`user-session:${userId}`);
+    if (sessionData) {
+      console.log('Session data:', JSON.parse(sessionData));
+    } else {
+      console.log('No session data found for user:', userId);
+    }
+  } catch (err) {
+    console.error('Error retrieving session data from Redis:', err);
+  }
+};
+
 
 export const googleOAuth = async (profile: any, req: Request) => {
   const { id: googleId, displayName: name, emails } = profile;
@@ -177,6 +229,7 @@ export const googleOAuth = async (profile: any, req: Request) => {
       name: existingUserByGoogleId.name,
       role: existingUserByGoogleId.role || 'USER',
     };
+
     return existingUserByGoogleId;
   }
 
@@ -198,6 +251,7 @@ export const googleOAuth = async (profile: any, req: Request) => {
       name: updatedUser.name,
       role: updatedUser.role || 'USER',
     };
+
     return updatedUser;
   }
 
@@ -216,21 +270,10 @@ export const googleOAuth = async (profile: any, req: Request) => {
     name: newUser.name,
     role: newUser.role || 'USER',
   };
-  return newUser;
+
+  return newUser
 };
 
-// ログアウト機能
-export const logout = async (req: Request, res: Response) => {
-  // セッションの削除
-  req.session.destroy((err) => {
-    if (err) {
-      console.error('Error during logout:', err);
-      return res.status(500).json({ message: 'Logout failed' });
-    }
-    res.clearCookie('connect.sid'); // セッションIDのCookieを削除
-    res.status(200).json({ message: 'Logout successful' });
-  });
-};
 
 //ユーザーがセッション保存済みか確認
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {

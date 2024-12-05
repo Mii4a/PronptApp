@@ -9,7 +9,7 @@ const router = Router();
 // auth関係のエンドポイント
 router.post('/signup', asyncHandler(signup));
 router.post('/login', asyncHandler(login));
-router.get('/session', getSession);
+router.get('/session', asyncHandler(getSession));
 router.delete('/logout', logout)
 
 // Google OAuthエンドポイント
@@ -23,11 +23,13 @@ router.get(
     scope: ['profile', 'email'], 
     accessType: 'offline',
     prompt: 'consent',
-    failureRedirect: '/login' }),
+  }),
   (req, res) => {
-    // 認証成功後のリダイレクト処理
-    console.log('Google OAuth callback query:', req.query);
-    res.redirect(`${process.env.FRONTEND_URL}/products`); // フロントエンドのURLにリダイレクト
+    if (req.isAuthenticated()) {
+      res.redirect(`${process.env.FRONTEND_URL}/products`);
+    } else {
+      res.redirect(`${process.env.FRONTEND_URL}/login`);
+    }
   }
 );
 

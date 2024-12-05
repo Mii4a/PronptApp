@@ -1,7 +1,8 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { googleOAuth } from './controllers/authController';
-import prisma from './lib/db';
+import { googleOAuth } from '@/src/controllers/authController';
+import prisma from '@/src/lib/db';
+import redisClient from '@/src/util/redisClient';
 
 passport.serializeUser((user: any, done) => {
   done(null, user.id);
@@ -26,11 +27,19 @@ passport.use(
     },
     async (req, accessToken, refreshToken, profile, done) => {
       try {
-        // googleOAuthにprofileとreqを渡して処理
+        // resとnextを直接取得
+        const res = req.res;
+        const next = req.next;
+
+        if (!res || !next) {
+          return done(new Error('Response or next function is undefined'), undefined);
+        }
+
+        // googleOAuthにprofile, req, res, nextを渡して処理
         const user = await googleOAuth(profile, req);
+        await redisClient.set(`user-session:${user.id}`, JSON.stringify(user))
         done(null, user);
       } catch (error) {
-        
         done(error, undefined);
       }
     }
