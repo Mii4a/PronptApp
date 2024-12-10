@@ -17,7 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.20.0",
+    "@prisma/client": "^6.0.1",
     "@redis/client": "^1.6.0",
     "@types/cookie-parser": "^1.4.7",
     "axios": "^1.7.7",

@@ -1,32 +1,32 @@
-# Node.js 23の軽量イメージを使用
-FROM node:22-alpine
+# Node.js 22の軽量イメージを使用
+FROM node:22-slim
 
-# 環境変数を設定    
-ARG NODE_ENV
+# 環境変数を設定
+ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
 
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 # 必要なパッケージをインストール
-RUN apk add --no-cache sudo
+RUN apt-get update && apt-get install -y \
+    libssl3 \
+    build-essential \
+    curl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 作業ディレクトリを作成
 WORKDIR /frontend
 
-# package.jsonをコピー, 依存関係をインストール
+# package.jsonとpackage-lock.jsonをコピーして依存関係をインストール
 COPY package*.json ./
-RUN npm i
+RUN npm ci
 
 # アプリケーションのコードをコピー
 COPY . .
 
-
 # アプリケーションをビルド
 RUN npm run build
-
-# ビルド済みのファイルを一時ディレクトリにコピー
-RUN cp -r .next /tmp/next
 
 # 3000ポートを公開
 EXPOSE 3000

@@ -1,8 +1,12 @@
-# ベースイメージ
-FROM node:22-alpine
+# ベースイメージを Debian Slim に変更
+FROM node:22-slim
 
 # 必要なパッケージをインストール
-RUN apk add --no-cache sudo
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    python3 \
+    libssl-dev
 
 # 作業ディレクトリを作成
 WORKDIR /backend
