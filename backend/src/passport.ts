@@ -1,7 +1,8 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { googleOAuth } from './controllers/authController';
-import prisma from './lib/db';
+import { googleOAuth } from '@/src/controllers/authController';
+import prisma from '@/src/lib/db';
+import { saveSessionToRedis, getSessionFromRedis } from '@/src/util/redisSession';
 
 passport.serializeUser((user: any, done) => {
   done(null, user.id);
@@ -9,7 +10,7 @@ passport.serializeUser((user: any, done) => {
 
 passport.deserializeUser(async (id: number, done) => {
   try { 
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({ where: {id} })
     done(null, user);
   } catch (err) {
     done(err, null);
@@ -21,12 +22,12 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: `${process.env.FRONTEND_URL}/api/auth/google/callback`,
+      callbackURL: `${process.env.GOOGLE_CALLBACK_URL}`,
       passReqToCallback: true, // reqを渡すために必要
     },
     async (req, accessToken, refreshToken, profile, done) => {
-      try {
-        // googleOAuthにprofileとreqを渡して処理
+      try { 
+        // googleOAuthにprofile, req, res, nextを渡して処理
         const user = await googleOAuth(profile, req);
         done(null, user);
       } catch (error) {

@@ -10,14 +10,14 @@
     "start": "NODE_ENV=production next start -p 3001",
     "db:seed": "ts-node prisma/seed.ts",
     "start:express": "NODE_ENV=production node dist/server.js",
-    "dev:express": "nodemon",
+    "dev:express": "NODE_ENV=development nodemon",
     "build:express": "tsc -p ./tsconfig.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.20.0",
+    "@prisma/client": "^6.0.1",
     "@redis/client": "^1.6.0",
     "@types/cookie-parser": "^1.4.7",
     "axios": "^1.7.7",
