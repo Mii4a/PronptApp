@@ -1,16 +1,17 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/router';
-import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import Link from 'next/link';
+import { useLogin } from '@/hooks/useAuth';
+
+// components
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { GoogleOAuthButton } from "@/components/ui/oauth/GoogleOAuthButton";
-import Link from 'next/link';
-import axios from 'axios';
 
 // Yupでバリデーションスキーマを作成
 const schema = yup.object().shape({
@@ -22,18 +23,10 @@ export default function UserLoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(schema)
   })
-  const router = useRouter();
+  const { login } = useLogin();
 
   const onSubmit = async (data: any) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL
-    
-    try {
-      await axios.post(`${apiUrl}/api/auth/login`, data, { withCredentials: true })
-      router.push('/') //ログイン成功時にリダイレクト
-    } catch (err) {
-      console.log('Login error:', err)  
-      alert('Email or Password is invalid') //ログイン失敗時にアラートを表示
-    }
+    await login(data.email, data.password);
   }
 
   return (

@@ -1,5 +1,4 @@
 import React from 'react';
-
 import ProductListForm from '@/components/ProductListForm';
 import { Header } from '@/components/Header'
 import { GetServerSideProps } from 'next';
