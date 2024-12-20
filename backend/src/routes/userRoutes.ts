@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer'; // 画像等のファイルデータのミドルウェア
 import asyncHandler from '../util/asyncHandler';
 import { isAuthenticated } from '../controllers/authController';
-import { updateUser } from '@/src/controllers/userController';
+import { updateUser } from '../controllers/userController';
 
 const router = Router();
 
