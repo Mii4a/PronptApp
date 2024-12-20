@@ -1,7 +1,7 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { googleOAuth } from './controllers/authController';
-import prisma from '@/src/lib/db';
+import prisma from './lib/db';
 import { saveSessionToRedis, getSessionFromRedis } from '@/src/util/redisSession';
 
 passport.serializeUser((user: any, done) => {

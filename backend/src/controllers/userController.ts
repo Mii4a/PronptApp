@@ -1,9 +1,6 @@
 import { Request, Response} from 'express';
-import { promisify } from 'util';
-import prisma from '@/src/lib/db';
-import bcrypt from 'bcrypt';
-import * as yup from 'yup';
-import redisClient from '@/src/util/redisClient';
+import prisma from '../lib/db';
+
 
 export const updateUser = async (req: Request, res: Response) => {
   const userId = parseInt(req.params.id, 10);
