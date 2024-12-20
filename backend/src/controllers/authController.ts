@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { promisify } from 'util';
-import prisma from '@/src/lib/db';
+import prisma from '../lib/db';
 import bcrypt from 'bcrypt';
 import * as yup from 'yup';
-import redisClient from '@/src/util/redisClient';
+import redisClient from '../util/redisClient';
 
 
 // バリデーションスキーマの作成
