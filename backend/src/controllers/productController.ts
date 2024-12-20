@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage }).fields([
     { name: 'imageUrls[]', maxCount: 10 }, // Productのメイン画像（複数可）
     { name: 'promptImages', maxCount: 10 }, // 各Prompt用の画像（各プロンプトに1つ）
-  ])
+]);
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2024-11-20.acacia',
@@ -52,15 +52,24 @@ export const registerProduct = async (req: Request, res: Response) => {
     console.log('Request body:', req.body);
 
     try {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
       // アップロードされた画像URLの取得
-      const uploadedImageUrls = imageUrls ? 
-        (imageUrls as Express.Multer.File[]).map(file => `/uploads/${file.filename}`) : [];
+      // const uploadedImageUrls = imageUrls ? 
+      //   (imageUrls as Express.Multer.File[]).map(file => `/uploads/${file.filename}`) : [];
 
-      
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const promptImagesUrls = prompts.imageUrl ?
-        (prompts.imageUrl as Express.Multer.File[]).map(file => `/uploads/${file.filename}`) : [];
-      
+      // Product用画像のURL配列生成
+      const uploadedImageUrls = files['imageUrls[]']
+        ? files['imageUrls[]'].map(file => `${apiUrl}/uploads/${file.filename}`)
+        : [];
+
+      const promptImagesUrls = files['promptImages']
+        ? files['promptImages'].map(file => `${apiUrl}/uploads/${file.filename}`)
+        : [];
+
+
       // プロンプトデータの整形
       const formattedPrompts = prompts ? prompts.map((prompt: any, index: number) => ({
         input: prompt.input,

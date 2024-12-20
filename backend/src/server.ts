@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import authRoutes from './routes/authRoutes';
 import productRoutes from './routes/productRoutes';
-
+import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,7 +18,7 @@ console.log('Environment:', process.env.NODE_ENV);
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // セッションミドルウェアの設定
 app.use(

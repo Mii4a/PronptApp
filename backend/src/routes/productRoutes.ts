@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, Router }from 'express';
+import { Router }from 'express';
 import multer from 'multer'; // 画像等のファイルデータのミドルウェア
 import asyncHandler from '../util/asyncHandler';
 import { isAuthenticated } from '../controllers/authController';

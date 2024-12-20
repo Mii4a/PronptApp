@@ -15,7 +15,7 @@ const clearCookies = (req: Request, res: Response, next: NextFunction) => {
 router.post('/signup', asyncHandler(signup));
 router.post('/login', asyncHandler(login));
 router.get('/session', asyncHandler(getSession));
-router.delete('/logout', logout);
+router.delete('/logout', asyncHandler(logout));
 
 // Google OAuthエンドポイント
 router.get('/google', clearCookies, passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -35,6 +35,11 @@ router.get(
       req.session.user = {
         id: req.user.id,
         name: req.user.name,
+        email: req.user.email,
+        bio: req.user.bio,
+        avatar: req.user.avatar,
+        emailNotifications: req.user.emailNotifications,
+        pushNotifications: req.user.pushNotifications
       };
       req.session.save((err) => {
         if (err) {
