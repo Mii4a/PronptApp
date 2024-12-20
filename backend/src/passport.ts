@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { googleOAuth } from '@/src/controllers/authController';
+import { googleOAuth } from './controllers/authController';
 import prisma from '@/src/lib/db';
 import { saveSessionToRedis, getSessionFromRedis } from '@/src/util/redisSession';
 
