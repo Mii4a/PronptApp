@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { promisify } from 'util';
 import prisma from '@/src/lib/db';
 import bcrypt from 'bcrypt';
 import * as yup from 'yup';
@@ -35,13 +36,17 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
         password: passwordHash,
       },
     });
-    console.log(newUser);
-
-    // 動作確認用
-    (req.session as any).user = { id: newUser.id, name: newUser.name };
 
     // セッションにユーザーIDとユーザー名を保存
-    req.session.user = { id: newUser.id, name: newUser.name };
+    req.session.user = { 
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      bio: newUser.bio,
+      avatar: newUser.avatar,
+      emailNotifications: newUser.emailNotifications,
+      pushNotifications: newUser.pushNotifications
+    };
     res.status(201).json({ message: 'User signed up successfully!', user: newUser });
   } catch (error) {
     if (error instanceof yup.ValidationError) {
@@ -76,7 +81,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     req.session.user = {
       id: user.id,
       name: user.name,
-      role: user.role || 'USER',
+      email: user.email,
+      bio: user.bio,
+      avatar: user.avatar,
+      emailNotifications: user.emailNotifications,
+      pushNotifications: user.pushNotifications
     };
     
     if (req.session.user) {
@@ -93,28 +102,16 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 // ログアウト機能
 export const logout = async (req: Request, res: Response) => {
-  const userId = req.session?.user?.id;
+  const destroySession = promisify(req.session.destroy).bind(req.session);
 
-  // セッションの削除
-  req.session.destroy(async (err) => {
-    if (err) {
-      console.error('Error during logout:', err);
-      return res.status(500).json({ message: 'Logout failed' });
-    }
-
-    // Redisからセッションを削除
-    if (userId) {
-      try {
-        await redisClient.del(`user-session:${userId}`);
-        console.log('Session deleted from Redis:', userId);
-      } catch (redisErr) {
-        console.error('Error deleting session from Redis:', redisErr);
-      }
-    }
-
-    res.clearCookie('connect.sid'); // セッションIDのCookieを削除
+  try {
+    await destroySession();
+    res.clearCookie('connect.sid');
     res.status(200).json({ message: 'Logout successful' });
-  });
+  } catch (err) {
+    console.error('Error during logout:', err);
+    res.status(500).json({ message: 'Logout failed' });
+  }
 };
 
 // セッション取得機能
@@ -135,9 +132,6 @@ export const getSession = async (req: Request, res: Response, next: NextFunction
         return res.status(200).json({ user: parsedSession.user });
       }
     }
-
-    // セッション情報が見つからない場合
-    return res.status(401).json({ error: 'User not authenticated' });
   } catch (err) {
     console.error('Error retrieving session:', err);
     next(err);
@@ -160,7 +154,11 @@ export const googleOAuth = async (profile: any, req: Request) => {
     req.session.user = {
       id: existingUserByGoogleId.id,
       name: existingUserByGoogleId.name,
-      role: existingUserByGoogleId.role || 'USER',
+      email: existingUserByGoogleId.email,
+      bio: existingUserByGoogleId.bio,
+      avatar: existingUserByGoogleId.avatar,
+      emailNotifications: existingUserByGoogleId.emailNotifications,
+      pushNotifications: existingUserByGoogleId.pushNotifications
     };
 
     return existingUserByGoogleId;
@@ -182,7 +180,11 @@ export const googleOAuth = async (profile: any, req: Request) => {
     req.session.user = {
       id: updatedUser.id,
       name: updatedUser.name,
-      role: updatedUser.role || 'USER',
+      email: updatedUser.email,
+      bio: updatedUser.bio,
+      avatar: updatedUser.avatar,
+      emailNotifications: updatedUser.emailNotifications,
+      pushNotifications: updatedUser.pushNotifications
     };
 
     return updatedUser;
@@ -201,7 +203,11 @@ export const googleOAuth = async (profile: any, req: Request) => {
   req.session.user = {
     id: newUser.id,
     name: newUser.name,
-    role: newUser.role || 'USER',
+    email: newUser.email,
+    bio: newUser.bio,
+    avatar: newUser.avatar,
+    emailNotifications: newUser.emailNotifications,
+    pushNotifications: newUser.pushNotifications
   };
 
   return newUser

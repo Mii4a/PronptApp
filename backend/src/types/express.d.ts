@@ -7,7 +7,11 @@ declare module 'express-serve-static-core' {
       id: number;
       name: string;
       password?: string;
-      role?: string;
+      email: string;
+      bio: string | null;
+      avatar: string | null; 
+      emailNotifications: boolean;
+      pushNotifications: boolean;
     };
   }
 }

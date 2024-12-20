@@ -27,7 +27,6 @@ passport.use(
     },
     async (req, accessToken, refreshToken, profile, done) => {
       try { 
-        // googleOAuthにprofile, req, res, nextを渡して処理
         const user = await googleOAuth(profile, req);
         done(null, user);
       } catch (error) {
