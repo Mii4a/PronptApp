@@ -34,4 +34,4 @@ EXPOSE 3001
 USER node
 
 # アプリケーションを起動
-CMD ["npm", "run", "dev:express"]
+CMD ["npm", "run", "start:express"]
