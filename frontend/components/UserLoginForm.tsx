@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { useLogin } from '@/hooks/useAuth';
 
 // components
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Header } from './Header';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { GoogleOAuthButton } from "@/components/ui/oauth/GoogleOAuthButton";
 
 // Yupでバリデーションスキーマを作成

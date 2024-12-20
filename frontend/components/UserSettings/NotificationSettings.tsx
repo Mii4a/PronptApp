@@ -1,12 +1,17 @@
-import { UseFormReturn } from "react-hook-form"
-import { Switch } from "@/components/ui/switch"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { UseFormReturn } from "react-hook-form";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-export const NotificationSettings = ({ form }: { form: UseFormReturn<any> }) => {
+type FormProps = {
+  form: UseFormReturn<any>;
+  handleSubmit: (data: any) => void;
+};
+
+export const NotificationSettings = ({ form, handleSubmit }: FormProps) => {
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(console.log)} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         <FormField
           control={form.control}
           name="emailNotifications"
@@ -14,10 +19,10 @@ export const NotificationSettings = ({ form }: { form: UseFormReturn<any> }) => 
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <FormLabel className="text-base">
-                  メール通知
+                  Email Notifications
                 </FormLabel>
                 <FormDescription>
-                  重要な更新をメールで受け取ります。
+                  Receive important updates via email.
                 </FormDescription>
               </div>
               <FormControl>
@@ -36,10 +41,10 @@ export const NotificationSettings = ({ form }: { form: UseFormReturn<any> }) => 
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <FormLabel className="text-base">
-                  プッシュ通知
+                  Push Notifications
                 </FormLabel>
                 <FormDescription>
-                  アプリからのプッシュ通知を受け取ります。
+                  Receive push notifications from the app.
                 </FormDescription>
               </div>
               <FormControl>
@@ -51,8 +56,8 @@ export const NotificationSettings = ({ form }: { form: UseFormReturn<any> }) => 
             </FormItem>
           )}
         />
-        <Button type="submit">設定を保存</Button>
+        <Button type="submit">Save</Button>
       </form>
     </Form>
-  )
-}
+  );
+};

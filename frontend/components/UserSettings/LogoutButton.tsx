@@ -1,4 +1,4 @@
-import { useLogout } from "@/hooks/useAuth"
+import { useLogout } from "@/hooks/useAuth";
 
 import { AlertDialog, 
          AlertDialogAction, 
@@ -8,8 +8,8 @@ import { AlertDialog,
          AlertDialogFooter, 
          AlertDialogHeader, 
          AlertDialogTitle, 
-         AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
+         AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 export const LogoutButton = () => {
   const { logout } = useLogout();
@@ -17,20 +17,20 @@ export const LogoutButton = () => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" className="w-full">ログアウト</Button>
+        <Button variant="outline" className="w-full">Logout</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>ログアウトしますか？</AlertDialogTitle>
+          <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
           <AlertDialogDescription>
-            ログアウトすると、再度ログインするまでアカウントにアクセスできなくなります。
+            Logging out will prevent access to your account until you log back in.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>キャンセル</AlertDialogCancel>
-          <AlertDialogAction onClick={logout}>ログアウト</AlertDialogAction>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={logout}>Log out</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
-}
+  );
+};

@@ -5,19 +5,19 @@ export const DeleteAccountButton = () => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="w-full">アカウントを削除</Button>
+        <Button variant="destructive" className="w-full">Delete Account</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>本当にアカウントを削除しますか？</AlertDialogTitle>
+          <AlertDialogTitle>Are you sure you want to delete your account?</AlertDialogTitle>
           <AlertDialogDescription>
-            この操作は取り消せません。アカウントを削除すると、すべてのデータが永久に失われます。
+            This action cannot be undone. Deleting your account will permanently remove all your data.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>キャンセル</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction className="bg-destructive text-destructive-foreground">
-            アカウントを削除
+            Delete Account
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

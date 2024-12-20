@@ -1,26 +1,34 @@
 import React, { useEffect, useState } from 'react';
+import { useQuery } from 'react-query'
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import Link from 'next/link';
 import axios from 'axios';
 
+type Product = {
+  id: number
+  userId: number
+  user: {
+    name: string
+  }
+  title: string
+  price: number
+  currency: 'JPY' | 'USD'
+  type: 'WEBAPP' | 'PROMPT'
+  imageUrls: string[]
+}
+
+const fetchProducts = async (): Promise<Product[]> => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  const { data } = await axios.get(`${apiUrl}/api/products`)
+  console.log('Fetched products:', data)
+  return data
+}
 
 export default function IndexMainForm() {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const res = await axios.get('/api/products');
-        setProducts(res.data);
-      } catch (error) {
-        console.error('Error fetching items:', error);
-      }
-    }
-    fetchProducts();
-  }, [reset]);
+  const { data: products, isLoading, error } = useQuery<Product[], Error>('products', fetchProducts)
 
   return (
     <main className="flex-grow">
@@ -43,7 +51,7 @@ export default function IndexMainForm() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">Featured Items</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product: any) => (
+            {products?.map((product: any) => (
               <Card key={product.id}>
                 <CardHeader>
                   <CardTitle>Featured {product.title}</CardTitle>

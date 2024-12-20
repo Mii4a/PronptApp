@@ -1,37 +1,17 @@
 import axios from "axios";
 import { useRouter } from "next/router";
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { SessionUser } from '@/types/sessionUser';
 
 // User モデルと対応した TypeScript インターフェイス
-interface User {
-  id: number;
-  email: string;
-  password?: string;
-  name: string;
-  role: 'USER' | 'ADMIN'; 
-  refreshToken?: string;
-  googleId?: string;
-  createdAt: string; 
-  updatedAt: string;
-  bio?: string;
-  avatar?: string;
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  // products, transactions, userProductsも取得したければ型定義
-  // products?: Product[];
-  // transactions?: Transaction[];
-  // userProducts?: UserProduct[];
-}
-
 // ログイン用のAPI呼び出し関数
-const loginRequest = async (email: string, password: string): Promise<User> => {
+const loginRequest = async (email: string, password: string): Promise<{ user: SessionUser }> => {
   const loginUrl = process.env.NEXT_PUBLIC_API_LOGIN_URL;
-  console.log("LOGIN URL:", loginUrl);
   if (!loginUrl) {
-    throw new Error("LOGIN_URL is not defined");
+    throw new Error("Request URL is not defined");
   }
 
-  const { data } = await axios.post<User>(
+  const { data } = await axios.post<{ user: SessionUser }>(
     loginUrl,
     { email, password },
     { withCredentials: true }
@@ -43,11 +23,24 @@ const loginRequest = async (email: string, password: string): Promise<User> => {
 const logoutRequest = async () => {
   const logoutUrl = process.env.NEXT_PUBLIC_API_LOGOUT_URL;
   if (!logoutUrl) {
-    throw new Error("LOGOUT_URL is not defined");
+    throw new Error("Request URL is not defined");
   }
 
   await axios.delete(logoutUrl, { withCredentials: true });
 };
+
+// ログインユーザー取得用のAPI呼び出し関数
+const fetchSessionUserRequest = async (): Promise<SessionUser> => {
+  const getLoginUserUrl = process.env.NEXT_PUBLIC_API_GET_SESSION_USER_URL;
+  if (!getLoginUserUrl) {
+    throw new Error("Request URL is not defined");
+  }
+
+  const response = await axios.get<{ user: SessionUser }>(getLoginUserUrl, { withCredentials: true });
+  const { user } = response.data;
+  console.log('fetch User:', user);
+  return user;
+}
 
 export const useLogin = () => {
   const router = useRouter();
@@ -59,7 +52,9 @@ export const useLogin = () => {
     {
       onSuccess: (data) => {
         // ログイン成功時にユーザー情報をReact Queryに保存
-        queryClient.setQueryData(['user'], data);
+        const { user } = data;
+        queryClient.setQueryData(['sessionUser'], user);
+        console.log("user query data:", user);
 
         // 特定のページへリダイレクト
         router.push('/products');
@@ -86,7 +81,7 @@ export const useLogout = () => {
   const mutation = useMutation(logoutRequest, {
     onSuccess: () => {
       // ログアウト時にユーザー情報をキャッシュからクリア
-      queryClient.removeQueries(['user']);
+      queryClient.removeQueries(['sessionUser']);
       // ログインページへリダイレクト
       router.push('/login');
     },
@@ -102,3 +97,13 @@ export const useLogout = () => {
 
   return { logout, isLoading: mutation.isLoading };
 };
+
+export const useFetchSessionUser = (options = {}) => {
+  return useQuery(['sessionUser'], fetchSessionUserRequest, {
+    ...options,
+    retry: false,
+    onError: (error) => {
+      console.error('Failed to fetch session:', error);
+    }
+  });
+}

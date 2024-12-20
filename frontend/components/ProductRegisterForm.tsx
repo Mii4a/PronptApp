@@ -11,7 +11,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Upload, ChevronLeft, ChevronRight, Plus, Trash2, ImageIcon, X } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import axios from 'axios';
+import { useRouter } from 'next/router';
 import { productRegisterSchema } from '@/validation/productRegisterSchema'
+import { NEXT_ROUTER_PREFETCH_HEADER } from 'next/dist/client/components/app-router-headers'
 
 type Currency = 'JPY' | 'USD'
 type ProductType = 'webapp' | 'prompt'
@@ -37,6 +39,7 @@ type FormData = {
 }
 
 export default function ProductRegisterForm() {
+  const router = useRouter()
   const [formData, setFormData] = useState<FormData>({
     type: 'webapp',
     title: '',
@@ -127,8 +130,8 @@ export default function ProductRegisterForm() {
       await axios.post(`${apiUrl}/api/products/register`, {
         ...formData,
         type: formData.type === 'webapp' ? 'WEBAPP' : 'PROMPT',
-        promptCount: formData.type === 'prompt' ? formData.promptCount : undefined,
-        prompts: formData.type === 'prompt' ? formData.prompts : undefined,
+        promptCount: formData.type === 'prompt' ? formData.promptCount : null,
+        prompts: formData.type === 'prompt' ? formData.prompts : null,
       }, {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true
@@ -138,27 +141,29 @@ export default function ProductRegisterForm() {
       toast({
         title: "Success",
         description: "Your item has been listed for sale.",
-      })
+      });
+      router.push(`${apiUrl}/products`);
+      
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {}
         error.errors.forEach((err) => {
           const path = err.path.join('.')
           newErrors[path] = err.message
-        })
-        setErrors(newErrors)
+        });
+        setErrors(newErrors);
         toast({
           title: "Error",
           description: "Please correct the errors in the form.",
           variant: "destructive",
-        })
+        });
       } else {
         console.error('Product registration failed', error);
         toast({
           title: "Error",
           description: "Failed to register the product. Please try again.",
           variant: "destructive",
-        })
+        });
       }
     }
   }
