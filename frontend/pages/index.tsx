@@ -1,4 +1,5 @@
-import Link from 'next/link';;
+import Link from 'next/link';
+import { useQuery } from 'react-query'
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,23 +8,47 @@ import axios from 'axios';
 import { GetServerSideProps } from 'next';
 import React from 'react';
 
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
-    const { data: user } = await axios.get(`${backendUrl}/auth/session`, {
-      headers: {
-        cookie: context.req.headers.cookie || '',
-      },
-    });
-
-    return { props: { user } };
-  } catch {
-    return { props: { user: null } };
+type Product = {
+  id: number
+  userId: number
+  user: {
+    name: string
   }
-};
+  title: string
+  description: string
+  price: number
+  currency: 'JPY' | 'USD'
+}
 
-const Home: React.FC<{ user: any }> = ({ user }) => {
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   try {
+//     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+//     const { data: products } = await axios.get(`${apiUrl}/auth/products`, {
+//       headers: {
+//         cookie: context.req.headers.cookie || '',
+//       },
+//     });
+
+//     return { props: { products } };
+//   } catch {
+//     return { props: { products: null } };
+//   }
+// };
+const fetchProducts = async (): Promise<Product[]> => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  const { data } = await axios.get(`${apiUrl}/api/products`)
+  console.log('Fetched products:', data)
+  return data
+}
+
+const Home: React.FC = () => {
+  const { data: products, isLoading, error } = useQuery<Product[], Error>('products', fetchProducts)
+  const formatPrice = (price: number, currency: 'JPY' | 'USD') => {
+    return currency === 'JPY'
+      ? `￥${Math.round(price).toLocaleString()}`
+      : `$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -48,21 +73,19 @@ const Home: React.FC<{ user: any }> = ({ user }) => {
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">Featured Items</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((item) => (
-                <Card key={item}>
+              {products?.map((product) => (
+                <Card key={product.id}>
                   <CardHeader>
-                    <CardTitle>Featured {item % 2 === 0 ? 'App' : 'Prompt Collection'}</CardTitle>
-                    <CardDescription>By Creator Name</CardDescription>
+                    <CardTitle>{product.title}</CardTitle>
+                    <CardDescription>{product.user.name}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      {item % 2 === 0
-                        ? 'An amazing web application that solves real-world problems.'
-                        : 'A collection of powerful prompts to boost your productivity.'}
+                      {product.description}
                     </p>
                   </CardContent>
                   <CardFooter className="flex justify-between">
-                    <span className="font-bold">${(9.99 * item).toFixed(2)}</span>
+                    <span className="font-bold">{formatPrice(product.price, product.currency)}</span>
                     <Button>View Details</Button>
                   </CardFooter>
                 </Card>
@@ -76,7 +99,7 @@ const Home: React.FC<{ user: any }> = ({ user }) => {
             <h2 className="text-3xl font-bold mb-4">Start Selling Today</h2>
             <p className="text-xl mb-8">Share your web apps and prompt collections with the world</p>
             <Button asChild size="lg">
-              <Link href="/sell">Become a Seller</Link>
+              <Link href="/login">Become a Seller</Link>
             </Button>
           </div>
         </section>

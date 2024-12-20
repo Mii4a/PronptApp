@@ -53,7 +53,6 @@ export default function UserSignupForm() {
           'Content-Type': 'application/json'
         }
       })
-      alert('Successfully signed up!')
       router.push('/login')
     } catch (err) {
       console.error('Signup error:', err)

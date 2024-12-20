@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { use } from 'react';
 import GoogleCallBack from '@/components/auth/AuthCallback';
 
 const AuthGoogleCallBackPage: React.FC = () => {
